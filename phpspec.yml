@@ -1,0 +1,6 @@
+suites:
+    main_suite:
+        namespace: Fesor\RAML
+        psr4_prefix: Fesor\RAML
+        spec_path: %paths.config%/tests
+    formatter.name: pretty

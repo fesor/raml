@@ -1,0 +1,27 @@
+{
+    "name": "fesor/raml",
+    "description": "PHP library for working with RAML",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sergey Protko",
+            "email": "fesors@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Fesor\\RAML\\": "src/"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "symfony/yaml": "~2.3.0|~3.0"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "^2.5"
+    }
+}
