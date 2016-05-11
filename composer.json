@@ -19,7 +19,9 @@
     },
     "minimum-stability": "stable",
     "require": {
-        "symfony/yaml": "~2.3.0|~3.0"
+        "symfony/yaml": "~2.3.0|~3.0",
+        "ql/uri-template": "^1.1",
+        "symfony/options-resolver": "^3.0"
     },
     "require-dev": {
         "phpspec/phpspec": "^2.5"
