@@ -14,8 +14,20 @@ class TypeNormalizer
         if ($value['type'] === 'object' && isset($value['properties'])) {
             $value['properties'] = $this->expandProperties($value['properties']);
         }
+        if ($value['type'] === 'array' && isset($value['items'])) {
+            $value['items'] = $this->expandItems($value['items']);
+        }
 
         return $value;
+    }
+
+    private function expandItems($items)
+    {
+        if (!is_array($items)) {
+            return $items;
+        }
+
+        return $this->normalize($items);
     }
 
     private function expandProperties(array $properties)

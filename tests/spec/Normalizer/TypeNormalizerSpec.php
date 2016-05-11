@@ -40,6 +40,21 @@ class TypeNormalizerSpec extends ObjectBehavior
         ]);
     }
 
+    function it_normalize_array_items()
+    {
+        $this->normalize([
+            'items' => [
+                'properties' => []
+            ]
+        ])->shouldReturnSubset([
+            'type' => 'array',
+            'items' => [
+                'type' => 'object',
+                'properties' => []
+            ]
+        ]);
+    }
+
     function it_normalizes_object_properties_with_question_mark()
     {
         $this->normalize([
