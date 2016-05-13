@@ -160,13 +160,38 @@ class TypeNormalizerSpec extends ObjectBehavior
         ]);
     }
 
+    function it_supports_property_patterns()
+    {
+        $this->normalize([
+            'properties' => [
+                'foo' => 'string',
+                '/^notes/' => 'number',
+                '//' => 'string'
+            ]
+        ])->shouldBeLike([
+            'type' => 'object',
+            'properties' => [
+                'foo' => ['type' => 'string']
+            ],
+            'patternProperties' => [
+                '^notes' => ['type' => 'number'],
+                '' => ['type' => 'string']
+            ]
+        ]);
+    }
+
     public function getMatchers()
     {
         return [
             'returnSubset' => function ($actual, $subset) {
                 $actualSubset = array_intersect_key($actual, $subset);
 
-                return $actualSubset == $subset;
+                if ($actualSubset != $subset) {
+                    echo json_encode($actualSubset, JSON_PRETTY_PRINT);
+                    return false;
+                }
+
+                return true;
             }
         ];
     }

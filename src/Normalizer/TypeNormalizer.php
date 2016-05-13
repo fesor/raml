@@ -21,18 +21,50 @@ class TypeNormalizer implements Normalizer
             }
         }
         if ($type === 'object' && isset($value['properties'])) {
-            $value['properties'] = $this->expandProperties($value['properties']);
+            $value['patternProperties'] = $this->normalizePatternProperties($value['properties']);
+            $value['properties'] = $this->normalizeProperties($value['properties']);
         }
         if ($type === 'array' && isset($value['items']) && is_string($value['items'])) {
             $value['items'] = $this->expandTypeExpression($value['items']);
         }
 
-        return array_filter($value);
+        return array_filter($value, function ($value) {
+            return null !== $value;
+        });
     }
 
     private function isUserDefinedTypeOrExpression($type)
     {
         return $type && !in_array($type, ['string', 'number', 'integer', 'array', 'object', 'boolean']);
+    }
+
+    private function normalizePatternProperties(array $properties)
+    {
+        $patternProperties = $this->filterPatternProperties($properties);
+        if (empty($patternProperties)) {
+            return null;
+        }
+
+        return $this->expandProperties(array_combine(
+            array_map(function ($key) {
+                return trim($key, '/');
+            }, array_keys($patternProperties)),
+            $patternProperties
+        ));
+    }
+
+    private function normalizeProperties(array $properties)
+    {
+        return $this->expandProperties(
+            $this->filterPatternProperties($properties, true)
+        );
+    }
+
+    private function filterPatternProperties(array $properties, $excludePatternProperties = false)
+    {
+        return array_filter($properties, function ($key) use ($excludePatternProperties) {
+            return $excludePatternProperties ^ (!!preg_match('/^\/.*\/$/', $key));
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     private function expandProperties(array $properties)
