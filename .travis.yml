@@ -6,7 +6,7 @@ php:
     - hhvm
 
 before_script:
-  - composer install
+  - composer install --no-interaction
 
 script:
-  - vendor/bin/phpspec run
+  - vendor/bin/phpspec run --format pretty --no-code-generation
