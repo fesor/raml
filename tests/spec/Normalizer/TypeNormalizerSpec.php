@@ -7,53 +7,69 @@ use Prophecy\Argument;
 
 class TypeNormalizerSpec extends ObjectBehavior
 {
-    function it_uses_string_type_by_default()
+
+    function it_uses_string_as_default_type()
     {
         $this->normalize([])->shouldReturnSubset([
-            'type' => 'string'
+            'type' => 'string',
         ]);
     }
 
-    function it_uses_object_type_if_properties_defined()
+    function it_guest_type_as_array_it_items_present()
     {
-        $this->normalize([
-            'properties' => []
-        ])->shouldReturnSubset([
-            'type' => 'object'
-        ]);
+        $this->normalize(['items' => 'string'])
+            ->shouldReturnSubset([
+                'type' => 'array',
+            ]);
     }
 
-    function it_uses_array_type_if_items_defined()
+    function it_guest_type_as_objet_it_properties_present()
     {
-        $this->normalize([
-            'items' => []
-        ])->shouldReturnSubset([
-            'type' => 'array'
-        ]);
-    }
-
-    function it_allows_short_array_declarations()
-    {
-        $this->normalize(['type' => 'Email[]'])->shouldReturnSubset([
-            'type' => 'array',
-            'items' => 'Email'
-        ]);
-    }
-
-    function it_normalize_array_items()
-    {
-        $this->normalize([
-            'items' => [
-                'properties' => []
-            ]
-        ])->shouldReturnSubset([
-            'type' => 'array',
-            'items' => [
+        $this->normalize(['properties' => []])
+            ->shouldReturnSubset([
                 'type' => 'object',
-                'properties' => []
-            ]
-        ]);
+            ]);
     }
+
+    function it_supports_type_expressions_for_array_declaration()
+    {
+        $this->normalize(['type' => 'string[]'])
+            ->shouldReturnSubset([
+                'type' => 'array',
+                'items' => ['type' => 'string']
+            ]);
+    }
+
+    function it_supports_type_expressions_for_union_types()
+    {
+        $this->normalize(['type' => 'number | string'])
+            ->shouldBeLike([
+                'oneOf' => [
+                    ['type' => 'string'],
+                    ['type' => 'number'],
+                ]
+            ]);
+    }
+
+    function it_supports_complex_type_expressions()
+    {
+        $this->normalize(['type' => 'boolean | (number | string)[]'])
+            ->shouldReturnSubset([
+                'oneOf' => [
+                    [
+                        'type' => 'array',
+                        'items' => [
+                            'oneOf' => [
+                                ['type' => 'string'],
+                                ['type' => 'number'],
+                            ]
+                        ]
+                    ],
+                    ['type' => 'boolean'],
+                ]
+            ]);
+    }
+
 
     function it_normalizes_object_properties_with_question_mark()
     {
@@ -109,6 +125,41 @@ class TypeNormalizerSpec extends ObjectBehavior
         ]);
     }
 
+    function it_allows_to_use_type_expressions_in_properties()
+    {
+        $this->normalize([
+            'properties' => [
+                'foo?' => 'string | number'
+            ]
+        ])->shouldBeLike([
+            'type' => 'object',
+            'properties' => [
+                'foo' => [
+                    'oneOf' => [
+                        ['type' => 'number'],
+                        ['type' => 'string'],
+                    ],
+                    'required' => false
+                ]
+            ]
+        ]);
+    }
+
+    function it_allows_to_use_type_expressions_in_array_items()
+    {
+        $this->normalize([
+            'items' => 'string | number'
+        ])->shouldBeLike([
+            'type' => 'array',
+            'items' => [
+                'oneOf' => [
+                    ['type' => 'number'],
+                    ['type' => 'string'],
+                ]
+            ]
+        ]);
+    }
+
     public function getMatchers()
     {
         return [
@@ -116,11 +167,7 @@ class TypeNormalizerSpec extends ObjectBehavior
                 $actualSubset = array_intersect_key($actual, $subset);
 
                 return $actualSubset == $subset;
-            },
-            'containFacets' => function ($actual, $expectedFacets) {
-                return $actual['facets'] == $expectedFacets;
             }
         ];
     }
-
 }
