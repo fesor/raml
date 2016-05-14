@@ -7,18 +7,5 @@ use Prophecy\Argument;
 
 class MethodNormalizerSpec extends ObjectBehavior
 {
-    function it_collects_methods()
-    {
-        $this->normalize([
-            'test' => 'test',
-            'post' => [],
-            'get' => []
-        ])->shouldBeLike([
-            'test' => 'test',
-            'methods' => [
-                ['method' => 'post'],
-                ['method' => 'get']
-            ]
-        ]);
-    }
+    
 }

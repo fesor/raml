@@ -9,22 +9,24 @@ class ResourcesNormalizer implements Normalizer
 {
     public function normalize($value)
     {
-        $resourcesKeys = $this->collectResourceKeys($value);
-        $resources = onlyWithinKeys($value, $resourcesKeys);
-        foreach ($resources as $uri => &$resource) {
-            $resource['uri'] = $uri;
-        }
-        $value['resources'] = array_map(function ($resource) {
-            return $this->normalize($resource);
-        }, array_values($resources));
+        $methods = $this->collectMethods($value);
+        $value['methods'] = array_values($methods);
+        $value = array_diff_key($value, $methods);
 
-        return excludingKeys($value, $resourcesKeys);
+        return $value;
     }
 
-    private function collectResourceKeys($value)
+    private function collectMethods($value)
     {
-        return array_filter(array_keys($value), function ($key) {
-            return 0 === mb_strpos($key, '/');
-        });
+        $methods = onlyWithinKeys($value, [
+            'get', 'patch', 'put', 'post', 'delete', 'options', 'head'
+        ]);
+
+        foreach ($methods as $httpMethod => &$methodDefinition)
+        {
+            $methodDefinition['method'] = $httpMethod;
+        }
+
+        return $methods;
     }
 }
