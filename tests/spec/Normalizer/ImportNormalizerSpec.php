@@ -17,11 +17,9 @@ class ImportNormalizerSpec extends ObjectBehavior
     {
         $loader->load('myTypes.raml')->willReturn('imported')->shouldBeCalled();
 
-        $this->normalize([
-            'types' => '!include myTypes.raml'
-        ])->shouldBeLike([
-            'types' => 'imported'
-        ]);
+        $this
+            ->normalize(['types' => '!include myTypes.raml'])
+            ->shouldBeLike(['types' => 'imported']);
     }
 
     function xit_collects_all_imports_recursivly(RAMLLoader $loader)
@@ -30,19 +28,11 @@ class ImportNormalizerSpec extends ObjectBehavior
         $loader->load('b.raml')->willReturn('b')->shouldBeCalled();
 
         $this->normalize([
-            'foo' => [
-                'a' => '!include a.raml'
-            ],
-            'bar' => [
-                'b' => '!include b.raml'
-            ]
+            'foo' => ['a' => '!include a.raml'],
+            'bar' => ['b' => '!include b.raml']
         ])->shouldBeLike([
-            'foo' => [
-                'a' => 'a'
-            ],
-            'bar' => [
-                'b' => 'b'
-            ]
+            'foo' => ['a' => 'a'],
+            'bar' => ['b' => 'b']
         ]);
     }
 }

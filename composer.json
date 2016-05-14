@@ -17,6 +17,11 @@
             "src/functions.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "support\\Fesor\\RAML\\": "tests/support"
+        }
+    },
     "minimum-stability": "stable",
     "require": {
         "symfony/yaml": "~2.3.0|~3.0",

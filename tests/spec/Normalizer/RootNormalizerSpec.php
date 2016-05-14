@@ -20,20 +20,17 @@ class RootNormalizerSpec extends ObjectBehavior
             'title' => 'API',
             '/' => [],
             '/users' => ['description' => '']
-        ])->shouldBeLike([
-            'title' => 'API',
-            'resources' => [
-                [
-                    'uri' => '/',
-                    'resources' => []
-                ],
-                [
-                    'uri' => '/users',
-                    'description' => '',
-                    'resources' => []
-                ]
+        ])->shouldBeArray([
+            [
+                'uri' => '/',
+                'resources' => []
+            ],
+            [
+                'uri' => '/users',
+                'description' => '',
+                'resources' => []
             ]
-        ]);
+        ], ['at' => 'resources']);
     }
 
     function it_normalizes_nested_resource_definitions()
@@ -44,20 +41,16 @@ class RootNormalizerSpec extends ObjectBehavior
                     'description' => 'user details'
                 ]
             ]
-        ])->shouldBeLike([
+        ])->shouldBeArray([
+            'uri' => '/users',
             'resources' => [
                 [
-                    'uri' => '/users',
-                    'resources' => [
-                        [
-                            'description' => 'user details',
-                            'uri' => '/{id}',
-                            'resources' => []
-                        ]
-                    ]
-                ],
+                    'description' => 'user details',
+                    'uri' => '/{id}',
+                    'resources' => []
+                ]
             ]
-        ]);
+        ], ['at' => 'resources/0']);
     }
 
     function it_normalizes_annotation_types_using_type_normalizer(Normalizer $typeNormalizer)
@@ -84,14 +77,11 @@ class RootNormalizerSpec extends ObjectBehavior
                     ]
                 ]
             ]
-        ])->shouldBeLike([
-            'resources' => [],
-            'annotationTypes' => [
-                'experimental' => 'tested',
-                'badge' => 'tested',
-                'clearanceLevel' => 'tested'
-            ],
-        ]);
+        ])->shouldBeArray([
+            'experimental' => 'tested',
+            'badge' => 'tested',
+            'clearanceLevel' => 'tested'
+        ], ['at' => 'annotationTypes']);
     }
 
     private function shouldNormalizeTypes($typeNormalizer, ...$types)

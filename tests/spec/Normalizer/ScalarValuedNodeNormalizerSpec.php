@@ -70,11 +70,9 @@ class ScalarValuedNodeNormalizerSpec extends ObjectBehavior
             'title' => [
                 '(annotation)' => 'value'
             ]
-        ])->shouldBeLike([
-            'title' => [
-                'value' => null,
-                '(annotation)' => 'value'
-            ]
-        ]);
+        ])->shouldContainSubset([
+            'value' => null,
+            '(annotation)' => 'value'
+        ], ['at' => 'title']);
     }
 }

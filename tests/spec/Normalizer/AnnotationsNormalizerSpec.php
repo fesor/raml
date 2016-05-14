@@ -21,12 +21,9 @@ class AnnotationsNormalizerSpec extends ObjectBehavior
             'value' => 'test',
             '(annotation1)' => 'value1',
             '(annotation2)' => 'value2'
-        ])->shouldBeLike([
-            'value' => 'test',
-            'annotations' => [
-                'annotation1' => 'value1',
-                'annotation2' => 'value2'
-            ]
-        ]);
+        ])->shouldBeArray([
+            'annotation1' => 'value1',
+            'annotation2' => 'value2'
+        ], ['at' => 'annotations']);
     }
 }

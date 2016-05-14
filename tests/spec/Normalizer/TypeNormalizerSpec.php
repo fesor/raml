@@ -10,7 +10,7 @@ class TypeNormalizerSpec extends ObjectBehavior
 
     function it_uses_string_as_default_type()
     {
-        $this->normalize([])->shouldReturnSubset([
+        $this->normalize([])->shouldContainSubset([
             'type' => 'string',
         ]);
     }
@@ -18,7 +18,7 @@ class TypeNormalizerSpec extends ObjectBehavior
     function it_guest_type_as_array_it_items_present()
     {
         $this->normalize(['items' => 'string'])
-            ->shouldReturnSubset([
+            ->shouldContainSubset([
                 'type' => 'array',
             ]);
     }
@@ -26,7 +26,7 @@ class TypeNormalizerSpec extends ObjectBehavior
     function it_guest_type_as_objet_it_properties_present()
     {
         $this->normalize(['properties' => []])
-            ->shouldReturnSubset([
+            ->shouldContainSubset([
                 'type' => 'object',
             ]);
     }
@@ -34,7 +34,7 @@ class TypeNormalizerSpec extends ObjectBehavior
     function it_supports_type_expressions_for_array_declaration()
     {
         $this->normalize(['type' => 'string[]'])
-            ->shouldReturnSubset([
+            ->shouldContainSubset([
                 'type' => 'array',
                 'items' => ['type' => 'string']
             ]);
@@ -43,7 +43,7 @@ class TypeNormalizerSpec extends ObjectBehavior
     function it_supports_type_expressions_for_union_types()
     {
         $this->normalize(['type' => 'number | string'])
-            ->shouldBeLike([
+            ->shouldContainSubset([
                 'oneOf' => [
                     ['type' => 'string'],
                     ['type' => 'number'],
@@ -54,20 +54,18 @@ class TypeNormalizerSpec extends ObjectBehavior
     function it_supports_complex_type_expressions()
     {
         $this->normalize(['type' => 'boolean | (number | string)[]'])
-            ->shouldReturnSubset([
-                'oneOf' => [
-                    [
-                        'type' => 'array',
-                        'items' => [
-                            'oneOf' => [
-                                ['type' => 'string'],
-                                ['type' => 'number'],
-                            ]
+            ->shouldContainSubset([
+                [
+                    'type' => 'array',
+                    'items' => [
+                        'oneOf' => [
+                            ['type' => 'string'],
+                            ['type' => 'number'],
                         ]
-                    ],
-                    ['type' => 'boolean'],
-                ]
-            ]);
+                    ]
+                ],
+                ['type' => 'boolean'],
+            ], ['at' => 'oneOf']);
     }
 
 
@@ -81,22 +79,20 @@ class TypeNormalizerSpec extends ObjectBehavior
                     'required' => true
                 ]
             ]
-        ])->shouldReturnSubset([
-            'properties' => [
-                'foo' => [
-                    'type' => 'string',
-                    'required' => false
-                ],
-                'bar?' => [
-                    'type' => 'string',
-                    'required' => false
-                ],
-                'buz?' => [
-                    'type' => 'string',
-                    'required' => true
-                ]
+        ])->shouldContainSubset([
+            'foo' => [
+                'type' => 'string',
+                'required' => false
+            ],
+            'bar?' => [
+                'type' => 'string',
+                'required' => false
+            ],
+            'buz?' => [
+                'type' => 'string',
+                'required' => true
             ]
-        ]);
+        ], ['at' => 'properties']);
     }
 
     function it_allow_inplace_type_declaration()
@@ -109,7 +105,7 @@ class TypeNormalizerSpec extends ObjectBehavior
                     ]
                 ]
             ]
-        ])->shouldReturnSubset([
+        ])->shouldContainSubset([
             'type' => 'object',
             'properties' => [
                 'foo' => [
@@ -131,7 +127,7 @@ class TypeNormalizerSpec extends ObjectBehavior
             'properties' => [
                 'foo?' => 'string | number'
             ]
-        ])->shouldBeLike([
+        ])->shouldContainSubset([
             'type' => 'object',
             'properties' => [
                 'foo' => [
@@ -149,7 +145,7 @@ class TypeNormalizerSpec extends ObjectBehavior
     {
         $this->normalize([
             'items' => 'string | number'
-        ])->shouldBeLike([
+        ])->shouldContainSubset([
             'type' => 'array',
             'items' => [
                 'oneOf' => [
@@ -168,7 +164,7 @@ class TypeNormalizerSpec extends ObjectBehavior
                 '/^notes/' => 'number',
                 '//' => 'string'
             ]
-        ])->shouldBeLike([
+        ])->shouldContainSubset([
             'type' => 'object',
             'properties' => [
                 'foo' => ['type' => 'string']
@@ -178,21 +174,5 @@ class TypeNormalizerSpec extends ObjectBehavior
                 '' => ['type' => 'string']
             ]
         ]);
-    }
-
-    public function getMatchers()
-    {
-        return [
-            'returnSubset' => function ($actual, $subset) {
-                $actualSubset = array_intersect_key($actual, $subset);
-
-                if ($actualSubset != $subset) {
-                    echo json_encode($actualSubset, JSON_PRETTY_PRINT);
-                    return false;
-                }
-
-                return true;
-            }
-        ];
     }
 }
