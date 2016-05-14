@@ -2,12 +2,15 @@
 
 namespace Fesor\RAML\Normalizer;
 
+use function Fesor\RAML\excludingKeys;
+use function Fesor\RAML\onlyWithinKeys;
+
 class ResourcesNormalizer implements Normalizer
 {
     public function normalize($value)
     {
         $resourcesKeys = $this->collectResourceKeys($value);
-        $resources = array_intersect_key($value, array_flip($resourcesKeys));
+        $resources = onlyWithinKeys($value, $resourcesKeys);
         foreach ($resources as $uri => &$resource) {
             $resource['uri'] = $uri;
         }
@@ -15,7 +18,7 @@ class ResourcesNormalizer implements Normalizer
             return $this->normalize($resource);
         }, array_values($resources));
 
-        return array_diff_key($value, array_flip($resourcesKeys));
+        return excludingKeys($value, $resourcesKeys);
     }
 
     private function collectResourceKeys($value)

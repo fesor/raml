@@ -2,6 +2,8 @@
 
 namespace Fesor\RAML\Normalizer;
 
+use function Fesor\RAML\onlyWithinKeys;
+
 class TypeNormalizer implements Normalizer
 {
 
@@ -62,9 +64,11 @@ class TypeNormalizer implements Normalizer
 
     private function filterPatternProperties(array $properties, $excludePatternProperties = false)
     {
-        return array_filter($properties, function ($key) use ($excludePatternProperties) {
+        $keys = array_filter(array_keys($properties), function ($key) use ($excludePatternProperties) {
             return $excludePatternProperties ^ (!!preg_match('/^\/.*\/$/', $key));
-        }, ARRAY_FILTER_USE_KEY);
+        });
+
+        return onlyWithinKeys($properties, $keys);
     }
 
     private function expandProperties(array $properties)
