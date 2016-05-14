@@ -7,6 +7,13 @@ use function Fesor\RAML\onlyWithinKeys;
 
 class ResourcesNormalizer implements Normalizer
 {
+    private $methodNormalizer;
+
+    public function __construct(Normalizer $methodNormalizer)
+    {
+        $this->methodNormalizer = $methodNormalizer;
+    }
+
     public function normalize($value)
     {
         $methods = $this->collectMethods($value);
@@ -25,6 +32,7 @@ class ResourcesNormalizer implements Normalizer
         foreach ($methods as $httpMethod => &$methodDefinition)
         {
             $methodDefinition['method'] = $httpMethod;
+            $methodDefinition = $this->methodNormalizer->normalize($methodDefinition);
         }
 
         return $methods;
