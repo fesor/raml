@@ -15,8 +15,9 @@ class ResourcesNormalizerSpec extends ObjectBehavior
 
     function it_collects_methods(Normalizer $methodNormalizer)
     {
-        $this->normalizerShouldBeCalledTimes($methodNormalizer, 2);
-        
+        $this->shouldNormalizeMethod($methodNormalizer, 'post');
+        $this->shouldNormalizeMethod($methodNormalizer, 'get');
+
         $this->normalize([
             'uri' => '/users',
             'test' => 'test',
@@ -34,10 +35,8 @@ class ResourcesNormalizerSpec extends ObjectBehavior
         ]);
     }
 
-    private function normalizerShouldBeCalledTimes($methodNormalizer, $n)
+    private function shouldNormalizeMethod($methodNormalizer, $method)
     {
-        $methodNormalizer->normalize(Argument::that(function ($arg) {
-            return isset($arg['method']);
-        }))->willReturn(['method'])->shouldBeCalledTimes($n);
+        $methodNormalizer->normalize(compact('method'))->willReturn(['method'])->shouldBeCalled();
     }
 }
