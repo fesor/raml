@@ -82,6 +82,28 @@ class TypeNormalizerSpec extends ObjectBehavior
             ], ['at' => 'oneOf']);
     }
 
+    function it_expands_nullable_type_expression_as_union_of_types()
+    {
+        $this->normalize('string?')
+            ->shouldBeArray([
+                'oneOf' => [
+                    ['type' => 'null'],
+                    ['type' => 'string']
+                ]
+            ]);
+
+        $this->normalize('string?[]')
+            ->shouldBeArray([
+                'type' => 'array',
+                'items' => [
+                    'oneOf' => [
+                        ['type' => 'null'],
+                        ['type' => 'string']
+                    ]
+                ]
+            ]);
+    }
+
     function it_normalizes_object_properties_with_question_mark()
     {
         $this->normalize([

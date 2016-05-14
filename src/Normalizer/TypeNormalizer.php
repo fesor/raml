@@ -6,7 +6,6 @@ use function Fesor\RAML\onlyWithinKeys;
 
 class TypeNormalizer implements Normalizer
 {
-
     public function normalize($value)
     {
         $expandedValue = is_array($value) ? $value : [];
@@ -150,6 +149,14 @@ class TypeNormalizer implements Normalizer
                     $stack[] = $union;
                     break;
 
+                case '?':
+                    $stack[] = [
+                        'oneOf' => [
+                            ['type' => 'null'],
+                            array_pop($stack)
+                        ]
+                    ];
+                    break;
                 case '[]':
                     $stack[] = [
                         'type' => 'array',
@@ -173,15 +180,16 @@ class TypeNormalizer implements Normalizer
      */
     private function rpn($str)
     {
-        preg_match_all('/((\[\]){1}|[\(\)\|]|[^\(\)\|\[\]\s]+?)/U', $str, $matches);
+        preg_match_all('/((\[\]){1}|[\(\)\|\?]|[^\(\)\|\?\[\]\s]+?)/U', $str, $matches);
         $tokens = $matches[0];
         $stack = [];
         $out = [];
-        $operators = array_flip(['|', '[]']);
+        $operators = array_flip(['|', '[]', '?']);
 
         foreach ($tokens as $token) {
             switch ($token) {
                 case '|':
+                case '?':
                 case '[]':
                     while (!empty($stack) && array_key_exists(end($stack), $operators)) {
                         if ($operators[$token] < $operators[end($stack)]) {
