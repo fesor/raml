@@ -134,6 +134,16 @@ class TypeNormalizerSpec extends ObjectBehavior
         ]);
     }
 
+    function it_supports_null_as_type()
+    {
+        $this->normalize('null')->shouldContainSubset(['type' => 'null']);
+    }
+
+    function it_allows_to_use_empty_value_as_null_type_declaration()
+    {
+        $this->normalize(null)->shouldContainSubset(['type' => 'null']);
+    }
+
     function it_allows_to_use_type_expressions_in_properties()
     {
         $this->normalize([

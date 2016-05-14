@@ -9,39 +9,38 @@ class TypeNormalizer implements Normalizer
 
     public function normalize($value)
     {
-        if (!is_array($value)) {
-            $value = ['type' => $value];
-        }
-        
-        $type = $value['type'] = $this->guessType($value);
+        $expandedValue = is_array($value) ? $value : [];
+        $expandedValue['type'] = $this->guessType($value);
 
-        if ($this->isUserDefinedTypeOrExpression($value['type'])) {
-            $expandedType = $this->expandTypeExpression($value['type']);
+        if ($this->isUserDefinedTypeOrExpression($expandedValue['type'])) {
+            $expandedType = $this->expandTypeExpression($expandedValue['type']);
             if (isset($expandedType['items'])) {
-                $value['type'] = 'array';
-                $value['items'] = $expandedType['items'];
+                $expandedValue['type'] = 'array';
+                $expandedValue['items'] = $expandedType['items'];
             } else if ($expandedType['oneOf']) {
-                unset($value['type']);
-                $value['oneOf'] = $expandedType['oneOf'];
-                $type = 'union';
+                unset($expandedValue['type']);
+                $expandedValue['oneOf'] = $expandedType['oneOf'];
             }
         }
-        if ($type === 'object' && isset($value['properties'])) {
-            $value['patternProperties'] = $this->normalizePatternProperties($value['properties']);
-            $value['properties'] = $this->normalizeProperties($value['properties']);
-        }
-        if ($type === 'array' && isset($value['items']) && is_string($value['items'])) {
-            $value['items'] = $this->expandTypeExpression($value['items']);
+
+        if (isset($expandedValue['type'])) {
+            if ($expandedValue['type'] === 'object' && isset($value['properties'])) {
+                $expandedValue['patternProperties'] = $this->normalizePatternProperties($value['properties']);
+                $expandedValue['properties'] = $this->normalizeProperties($value['properties']);
+            }
+            if ($expandedValue['type'] === 'array' && isset($value['items']) && is_string($value['items'])) {
+                $expandedValue['items'] = $this->expandTypeExpression($value['items']);
+            }
         }
 
-        return array_filter($value, function ($value) {
+        return array_filter($expandedValue, function ($value) {
             return null !== $value;
         });
     }
 
     private function isUserDefinedTypeOrExpression($type)
     {
-        return $type && !in_array($type, ['string', 'number', 'integer', 'array', 'object', 'boolean']);
+        return $type && !in_array($type, ['string', 'number', 'integer', 'array', 'object', 'boolean', 'null']);
     }
 
     private function normalizePatternProperties(array $properties)
@@ -101,6 +100,10 @@ class TypeNormalizer implements Normalizer
 
     private function guessType($value)
     {
+        if (!is_array($value)) {
+            $value = ['type' => $value];
+        }
+
         $typesForProperties = [
             'properties' => 'object',
             'items' => 'array',
@@ -113,7 +116,11 @@ class TypeNormalizer implements Normalizer
             }
         }
 
-        return isset($value['type']) ? $value['type'] : 'string';
+        if (array_key_exists('type', $value)) {
+            return $value['type'] ?: 'null';
+        }
+
+        return 'string';
     }
 
     /**
