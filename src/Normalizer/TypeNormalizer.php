@@ -31,6 +31,9 @@ class TypeNormalizer implements Normalizer
                 $expandedValue['items'] = $this->expandTypeExpression($value['items']);
             }
         }
+        if (isset($value['facets'])) {
+            $expandedValue['facets'] = $this->normalizeProperties($value['facets']);
+        }
 
         return array_filter($expandedValue, function ($value) {
             return null !== $value;

@@ -201,6 +201,24 @@ class TypeNormalizerSpec extends ObjectBehavior
         ]);
     }
 
+    function it_expands_user_defined_facets()
+    {
+        $this->normalize([
+            'facets' => [
+                'onlyFutureDates?' => 'boolean',
+                'noHolidays' => 'boolean'
+            ]
+        ])->shouldContainSubset([
+            'onlyFutureDates' => [
+                'type' => 'boolean',
+                'required' => false
+            ],
+            'noHolidays' => [
+                'type' => 'boolean'
+            ]
+        ], ['at' => 'facets']);
+    }
+
     function it_supports_property_patterns()
     {
         $this->normalize([
