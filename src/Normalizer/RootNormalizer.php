@@ -7,6 +7,17 @@ use function Fesor\RAML\excludingKeys;
 
 class RootNormalizer implements Normalizer
 {
+    private $typeNormalizer;
+
+    /**
+     * RootNormalizer constructor.
+     * @param Normalizer $typeNormalizer
+     */
+    public function __construct(Normalizer $typeNormalizer)
+    {
+        $this->typeNormalizer = $typeNormalizer;
+    }
+
     public function normalize($value)
     {
         $resourcesKeys = $this->collectResourceKeys($value);
@@ -19,6 +30,10 @@ class RootNormalizer implements Normalizer
             return $this->normalize($resource);
         }, array_values($resources));
 
+        if (isset($value['annotationTypes'])) {
+            $value['annotationTypes'] = $this->normalizeAnnotationTypes($value['annotationTypes']);
+        }
+
         return excludingKeys($value, $resourcesKeys);
     }
 
@@ -27,5 +42,12 @@ class RootNormalizer implements Normalizer
         return array_filter(array_keys($value), function ($key) {
             return 0 === mb_strpos($key, '/');
         });
+    }
+
+    private function normalizeAnnotationTypes(array $annotationTypes)
+    {
+        return array_map(function ($type) {
+            return $this->typeNormalizer->normalize($type);
+        }, $annotationTypes);
     }
 }
