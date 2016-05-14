@@ -9,6 +9,10 @@ class TypeNormalizer implements Normalizer
 
     public function normalize($value)
     {
+        if (!is_array($value)) {
+            $value = ['type' => $value];
+        }
+        
         $type = $value['type'] = $this->guessType($value);
 
         if ($this->isUserDefinedTypeOrExpression($value['type'])) {

@@ -7,7 +7,6 @@ use Prophecy\Argument;
 
 class TypeNormalizerSpec extends ObjectBehavior
 {
-
     function it_uses_string_as_default_type()
     {
         $this->normalize([])->shouldContainSubset([
@@ -68,6 +67,20 @@ class TypeNormalizerSpec extends ObjectBehavior
             ], ['at' => 'oneOf']);
     }
 
+    function it_expands_type_declaration_as_type_expression()
+    {
+        $this->normalize('string[] | number[]')
+            ->shouldBeArray([
+                [
+                    'type' => 'array',
+                    'items' => ['type' => 'number']
+                ],
+                [
+                    'type' => 'array',
+                    'items' => ['type' => 'string']
+                ]
+            ], ['at' => 'oneOf']);
+    }
 
     function it_normalizes_object_properties_with_question_mark()
     {
