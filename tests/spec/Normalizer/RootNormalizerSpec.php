@@ -3,15 +3,16 @@
 namespace spec\Fesor\RAML\Normalizer;
 
 use Fesor\RAML\Normalizer\Normalizer;
+use Fesor\RAML\Normalizer\NormalizerRegistry;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 class RootNormalizerSpec extends ObjectBehavior
 {
 
-    function let(Normalizer $typeNormalizer)
+    function let(NormalizerRegistry $normalizers)
     {
-        $this->beConstructedWith($typeNormalizer);
+        $this->beConstructedWith($normalizers);
     }
 
     function it_collects_resources()
@@ -53,9 +54,10 @@ class RootNormalizerSpec extends ObjectBehavior
         ], ['at' => 'resources/0']);
     }
 
-    function it_normalizes_annotation_types_using_type_normalizer(Normalizer $typeNormalizer)
+    function it_normalizes_annotation_types_using_type_normalizer(NormalizerRegistry $normalizers, Normalizer $typeNormalizer)
     {
 
+        $this->shouldAskForNormalizer($normalizers, $typeNormalizer, 'type');
         $this->shouldNormalizeTypes($typeNormalizer, 'null | string', null, [
                 'properties' => [
                     'level' => [
@@ -82,6 +84,11 @@ class RootNormalizerSpec extends ObjectBehavior
             'badge' => 'tested',
             'clearanceLevel' => 'tested'
         ], ['at' => 'annotationTypes']);
+    }
+
+    private function shouldAskForNormalizer($normalizers, $normalizer, $name)
+    {
+        $normalizers->getNormalizer($name)->willReturn($normalizer)->shouldBeCalled();
     }
 
     private function shouldNormalizeTypes($typeNormalizer, ...$types)

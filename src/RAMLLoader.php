@@ -6,7 +6,7 @@ interface RAMLLoader
 {
     /**
      * @param string $url
-     * @return array
+     * @return RAML
      */
     public function load($url);
 }

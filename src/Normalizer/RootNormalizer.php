@@ -7,15 +7,15 @@ use function Fesor\RAML\excludingKeys;
 
 class RootNormalizer implements Normalizer
 {
-    private $typeNormalizer;
+    private $normalizers;
 
     /**
      * RootNormalizer constructor.
-     * @param Normalizer $typeNormalizer
+     * @param NormalizerRegistry $normalizers
      */
-    public function __construct(Normalizer $typeNormalizer)
+    public function __construct(NormalizerRegistry $normalizers)
     {
-        $this->typeNormalizer = $typeNormalizer;
+        $this->normalizers = $normalizers;
     }
 
     public function normalize($value)
@@ -47,7 +47,7 @@ class RootNormalizer implements Normalizer
     private function normalizeAnnotationTypes(array $annotationTypes)
     {
         return array_map(function ($type) {
-            return $this->typeNormalizer->normalize($type);
+            return $this->normalizers->getNormalizer('type')->normalize($type);
         }, $annotationTypes);
     }
 }
