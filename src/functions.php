@@ -12,6 +12,14 @@ function excludingKeys(array $data, array $keys)
     return array_diff_key($data, array_flip($keys));
 }
 
+function withDefaultValues(array $defaults, array $data)
+{
+    return array_intersect_key(
+        array_replace($defaults, $data),
+        $defaults
+    );
+}
+
 /**
  * Naive media type validator.
  *
