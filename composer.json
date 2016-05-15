@@ -19,7 +19,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "support\\Fesor\\RAML\\": "tests/support"
+            "support\\Fesor\\RAML\\": "tests/support/",
+            "spec\\Fesor\\RAML\\": "tests/spec/"
         }
     },
     "minimum-stability": "stable",
