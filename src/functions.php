@@ -11,3 +11,17 @@ function excludingKeys(array $data, array $keys)
 {
     return array_diff_key($data, array_flip($keys));
 }
+
+/**
+ * Naive media type validator.
+ *
+ * Not sure does it covers all use cases
+ * that covered in RFC 6838
+ *
+ * @param string $mediaType
+ * @return boolean
+ */
+function isValidMediaType($mediaType)
+{
+    return !!preg_match('/^\w+\/[-+.\w]+$/', $mediaType);
+}

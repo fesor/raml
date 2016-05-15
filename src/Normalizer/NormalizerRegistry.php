@@ -11,6 +11,10 @@ class NormalizerRegistry
         $this->normalizersMap[$name] = $normalizer;
     }
 
+    /**
+     * @param $name
+     * @return Normalizer
+     */
     public function getNormalizer($name)
     {
         if (!isset($this->normalizersMap[$name])) {
