@@ -2,7 +2,7 @@
 
 namespace Fesor\RAML\Type;
 
-class TypeRegistry
+class TypeRegistry implements TypeResolver
 {
     private $types = [];
 
@@ -14,14 +14,6 @@ class TypeRegistry
         'object' => ObjectType::class
     ];
 
-    public function __construct()
-    {
-        $this->register('integer', [
-            'type' => 'number',
-            'multipleOf' => 1
-        ]);
-    }
-
     public function register($name, $typeDefinition = null)
     {
         if (!$typeDefinition instanceof Type) {
@@ -31,18 +23,23 @@ class TypeRegistry
         $this->types[$name] = $typeDefinition;
     }
 
+    public function isTypeRegistered($name)
+    {
+        return array_key_exists($name, $this->types);
+    }
+
     /**
-     * @param $name
+     * @param $typeName
      * @return Type
      */
-    public function resolve($name)
+    public function resolve($typeName)
     {
-        if (array_key_exists($name, $this->types)) {
-            return $this->types[$name];
+        if (array_key_exists($typeName, $this->types)) {
+            return $this->types[$typeName];
         }
 
         throw new \RuntimeException(sprintf(
-            'Unable to resolve type "%s"', $name
+            'Unable to resolve type "%s"', $typeName
         ));
     }
 
