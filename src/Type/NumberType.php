@@ -2,54 +2,46 @@
 
 namespace Fesor\RAML\Type;
 
-use function Fesor\RAML\withDefaultValues;
-
-class NumberType extends ScalarType
+class NumberType extends Type
 {
-    private static $supportedFormats = ['int64', 'int64', 'int', 'long', 'float', 'double', 'int16', 'int8'];
-
-    private $data;
-
-    public function __construct($name, array $data, $parentType = null)
+    protected function knownFacets()
     {
-        $this->data = withDefaultValues([
-            'minimum' => null,
-            'maximum' => null,
-            'format' => null,
-            'multipleOf' => null
-        ], $data);
-
-        if (
-            null !== $this->data['format']
-            && !in_array($this->data['format'], self::$supportedFormats)
-        ) {
-            throw new \RuntimeException(sprintf(
-                'Unsupported format "%s" for numeric value',
-                $this->data['format']
-            ));
-        }
-
-        parent::__construct($name, $data, $parentType);
+        return array_merge(parent::knownFacets(), [
+            'minimum',
+            'maximum',
+            'format',
+            'multipleOf'
+        ]);
     }
 
-
-    public function getMinimum()
+    public function minimum()
     {
-        return $this->data['minimum'];
+        return $this->facets['minimum'];
     }
 
-    public function getMaxium()
+    public function maximum()
     {
-        return $this->data['maximum'];
+        return $this->facets['maximum'];
     }
 
-    public function getFormat()
+    public function format()
     {
-        return $this->data['format'];
+        return $this->facets['format'];
     }
 
-    public function getMultipleOf()
+    public function multipleOf()
     {
-        return $this->data['multipleOf'];
+        return $this->facets['multipleOf'];
+    }
+
+    public function validateValue($value)
+    {
+        $errors = [
+            'minimum' => null !== $this->minimum() && $value < $this->minimum(),
+            'maximum' => null !== $this->maximum() && $value > $this->maximum(),
+            'multipleOf' => null !== $this->multipleOf() && fmod($value, $this->multipleOf()) !== 0.0
+        ];
+
+        return array_keys(array_filter($errors));
     }
 }

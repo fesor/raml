@@ -1,70 +1,52 @@
 <?php
 
+
 namespace Fesor\RAML\Type;
 
-use function Fesor\RAML\withDefaultValues;
 
 abstract class Type
 {
-    private $name;
+    protected $facets;
+    protected $userDefinedFacets;
+    protected $annotations;
+    protected $baseType;
 
-    private $data;
-
-    protected $parentType;
-
-    /**
-     * Type constructor.
-     * @param string $name
-     * @param array $data
-     * @param Type|null $parentType
-     */
-    protected function __construct($name, array $data, Type $parentType = null)
+    public function __construct($facets)
     {
-        $this->data = withDefaultValues([
-            'type' => 'string',
-            'example' => null,
-            'examples' => [],
-            'displayName' => $name,
-            'description' => '',
-            'annotations' => [],
-            'facets' => []
-        ], $data);
+        $keys = $this->knownFacets();
+        $defaultValues = array_fill(0, count($keys), null);
+        $defaults = array_combine($keys, $defaultValues);
 
-        $this->parentType = $parentType;
+        $this->facets = array_replace(
+            $defaults,
+            array_intersect_key($facets, $defaults)
+        );
     }
 
-    public function getDisplayName()
+    protected function knownFacets()
     {
-        return $this->data['displayName'];
+        return [
+            'description',
+            'displayName',
+        ];
     }
 
-    public function getDescription()
+    public function displayName()
     {
-        return $this->data['description'];
+        return (string) $this->facets['displayName'];
     }
 
-    public function getExample()
+    public function description()
     {
-        return $this->data['example'];
+        return (string) $this->facets['description'];
     }
 
-    public function getExamples()
+    public function extend(array $facets)
     {
-        return $this->data['examples'];
-    }
+        $extendedType = clone $this;
+        $extendedType->facets = array_replace($extendedType->facets, $facets);
+        $extendedType->baseType = $this;
 
-    public function getBaseType()
-    {
-        return $this->parentType;
-    }
-
-    public function getUserDefinedFacets()
-    {
-        return $this->data['facets'];
-    }
-
-    public function getAnnotations()
-    {
-        return $this->data['annotations'];
+        return $extendedType;
     }
 }
