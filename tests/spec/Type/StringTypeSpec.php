@@ -2,37 +2,66 @@
 
 namespace spec\Fesor\RAML\Type;
 
+use Fesor\RAML\Type\StringType;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
-class StringTypeSpec extends ObjectBehavior
+class StringTypeSpec extends TypeObjectBehaviour
 {
-    use TypeSpecTrait;
-
-    function it_supports_patterns()
+    function let()
     {
-        $this->fromArray([
-            'pattern' => '^\d+\-\w+$'
+        $this->withFacets([
+            'pattern' => 'pattern',
+            'minLength' => 7,
+            'maxLength' => 10
         ]);
-
-        $this->getPattern()->shouldReturn('^\d+\-\w+$');
     }
 
-    function it_supports_min_length()
+    function it_returns_description()
     {
-        $this->fromArray([
-            'minLength' => 1
-        ]);
-
-        $this->getMinLength()->shouldReturn(1);
+        $this->withFacets(['description' => 'test description']);
+        $this->description()->shouldReturn('test description');
     }
 
-    function it_supports_max_length()
+    function it_returns_display_name()
     {
-        $this->fromArray([
-            'maxLength' => 128
-        ]);
+        $this->withFacets(['displayName' => 'example type']);
+        $this->displayName()->shouldReturn('example type');
+    }
 
-        $this->getMaxLength()->shouldReturn(128);
+    function it_returns_pattern()
+    {
+        $this->withFacets(['pattern' => 'pattern']);
+        $this->pattern()->shouldReturn('/pattern/');
+    }
+
+    function it_returns_min_and_max_length()
+    {
+        $this->minLength()->shouldReturn(7);
+        $this->maxLength()->shouldReturn(10);
+    }
+
+    function it_returns_min_and_max_length_defaults()
+    {
+        $this->withFacets([]);
+        $this->minLength()->shouldReturn(0);
+        $this->maxLength()->shouldReturn(null);
+    }
+
+    function it_extendable()
+    {
+        $this->extend([
+            'pattern' => 'overwritten'
+        ])->shouldReturnExtendedType(function (StringType $type) {
+            return $type->pattern() === '/overwritten/';
+        });
+    }
+
+    function it_returns_list_of_validation_errors()
+    {
+        $this->validateValue('pattern ok')->shouldBeLike([]);
+        $this->validateValue('pattern too long')->shouldBeLike(['maxLength']);
+        $this->validateValue('short')->shouldBeLike(['minLength', 'pattern']);
+        $this->validateValue('invalid')->shouldBeLike(['pattern']);
     }
 }

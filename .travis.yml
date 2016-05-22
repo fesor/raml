@@ -10,3 +10,4 @@ before_script:
 
 script:
   - vendor/bin/phpspec run --format pretty --no-code-generation
+  - ./vendor/bin/phpunit

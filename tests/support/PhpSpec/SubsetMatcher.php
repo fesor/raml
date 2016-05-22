@@ -22,6 +22,8 @@ class SubsetMatcher implements MatcherInterface
                     $arguments[1]['at'] : []
             );
         }
+
+        return $subject;
     }
 
     public function negativeMatch($name, $subject, array $arguments)
@@ -33,6 +35,8 @@ class SubsetMatcher implements MatcherInterface
                 $isNegative=true
             );
         }
+
+        return $subject;
     }
 
     public function getPriority()

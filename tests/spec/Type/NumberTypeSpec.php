@@ -5,38 +5,43 @@ namespace spec\Fesor\RAML\Type;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
-class NumberTypeSpec extends ObjectBehavior
+class NumberTypeSpec extends TypeObjectBehaviour
 {
-    use TypeSpecTrait;
-
     function let()
     {
-        $this->fromArray([
-            'type' => 'number',
-            'minimum' => 4,
+        $this->withFacets([
+            'minimum' => 0,
             'maximum' => 100,
-            'format' => 'int64',
-            'multipleOf' => 4,
+            'multipleOf' => 1,
+            'format' => 'int32'
         ]);
     }
 
     function it_returns_minimum_value()
     {
-        $this->getMinimum()->shouldReturn(4);
+        $this->minimum()->shouldReturn(0);
     }
 
     function it_returns_maximum_value()
     {
-        $this->getMaxium()->shouldReturn(100);
+        $this->maximum()->shouldReturn(100);
     }
 
     function it_returns_format()
     {
-        $this->getFormat()->shouldReturn('int64');
+        $this->format()->shouldReturn('int32');
     }
 
-    function it_returns_multiplie_of()
+    function it_returns_multiple_of()
     {
-        $this->getMultipleOf()->shouldReturn(4);
+        $this->multipleOf()->shouldReturn(1);
+    }
+
+    function it_validates_number_value()
+    {
+        $this->validateValue(1)->shouldBeLike([]);
+        $this->validateValue(-10)->shouldBeLike(['minimum']);
+        $this->validateValue(101)->shouldBeLike(['maximum']);
+        $this->validateValue(1.34)->shouldBeLike(['multipleOf']);
     }
 }

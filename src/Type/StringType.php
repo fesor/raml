@@ -2,35 +2,59 @@
 
 namespace Fesor\RAML\Type;
 
-use function Fesor\RAML\withDefaultValues;
-
-class StringType extends ScalarType
+class StringType extends Type
 {
-    private $data;
-
-    public function __construct($name, array $data, Type $parentType = null)
+    protected function knownFacets()
     {
-        $this->data = withDefaultValues([
-            'pattern' => null,
-            'minLength' => 0,
-            'maxLength' => 2147483647
-        ], $data);
-
-        parent::__construct($name, $data, $parentType);
+        return array_merge(parent::knownFacets(), [
+            'pattern',
+            'minLength',
+            'maxLength',
+        ]);
     }
 
-    public function getPattern()
+    protected function isValidEnum(array $enum)
     {
-        return $this->data['pattern'];
+        return 0 === array_filter($enum, function ($val) {
+            return !(null === $val || is_string($val));
+        });
     }
 
-    public function getMinLength()
+    public function pattern()
     {
-        return $this->data['minLength'];
+        if (null === $this->facets['pattern']) {
+            return null;
+        }
+
+        return sprintf('/%s/', $this->facets['pattern']);
     }
 
-    public function getMaxLength()
+    public function minLength()
     {
-        return $this->data['maxLength'];
+        return (int) $this->facets['minLength'];
     }
+
+    public function maxLength()
+    {
+        return isset($this->facets['maxLength']) ?
+            (int) $this->facets['maxLength'] : null;
+    }
+
+    protected function isValidDeclaration()
+    {
+        return $this->minLength() <= $this->maxLength();
+    }
+
+    public function validateValue($value)
+    {
+        $errors = [
+            'maxLength' => null !== $this->maxLength() && mb_strlen($value) > $this->maxLength(),
+            'minLength' => mb_strlen($value) < $this->minLength(),
+            'pattern' => null !== $this->pattern() && !preg_match($this->pattern(), $value)
+        ];
+
+        return array_keys(array_filter($errors));
+    }
+
+
 }

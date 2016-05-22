@@ -45,7 +45,7 @@ class RamlParser
             return;
         }
 
-        if ($metadata['version'] > 1.0) {
+        if ($metadata['version'] !== 1.0) {
             throw new \RuntimeException(sprintf(
                 'This parser doesn\'t support this version or RAML specification',
                 $metadata['version']

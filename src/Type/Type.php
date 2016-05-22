@@ -1,70 +1,94 @@
 <?php
 
+
 namespace Fesor\RAML\Type;
 
-use function Fesor\RAML\withDefaultValues;
 
 abstract class Type
 {
-    private $name;
+    protected $facets;
+    protected $userDefinedFacets;
+    protected $annotations;
+    protected $baseType;
 
-    private $data;
-
-    protected $parentType;
-
-    /**
-     * Type constructor.
-     * @param string $name
-     * @param array $data
-     * @param Type|null $parentType
-     */
-    protected function __construct($name, array $data, Type $parentType = null)
+    public function __construct($facets)
     {
-        $this->data = withDefaultValues([
-            'type' => 'string',
-            'example' => null,
-            'examples' => [],
-            'displayName' => $name,
-            'description' => '',
-            'annotations' => [],
-            'facets' => []
-        ], $data);
+        $keys = $this->knownFacets();
+        $defaultValues = array_fill(0, count($keys), null);
+        $defaults = array_combine($keys, $defaultValues);
 
-        $this->parentType = $parentType;
+        $this->facets = array_replace(
+            $defaults,
+            array_intersect_key($facets, $defaults)
+        );
     }
 
-    public function getDisplayName()
+    protected function knownFacets()
     {
-        return $this->data['displayName'];
+        return [
+            'description',
+            'displayName',
+            'required'
+        ];
     }
 
-    public function getDescription()
+    public function displayName()
     {
-        return $this->data['description'];
+        return (string) $this->facets['displayName'];
     }
 
-    public function getExample()
+    public function description()
     {
-        return $this->data['example'];
+        return (string) $this->facets['description'];
     }
 
-    public function getExamples()
+    public function isRequired()
     {
-        return $this->data['examples'];
+        return false !== $this->facets['required'];
     }
 
-    public function getBaseType()
+    public function extend(array $facets)
     {
-        return $this->parentType;
+        $extendedType = clone $this;
+        $extendedType->facets = self::deepMerge($extendedType->facets, $facets);
+        $extendedType->baseType = $this;
+
+        if (!$extendedType->isValidDeclaration()) {
+            throw new \RuntimeException('Invalid type declaration');
+        }
+
+        return $extendedType;
     }
 
-    public function getUserDefinedFacets()
+    protected function isValidDeclaration()
     {
-        return $this->data['facets'];
+        return true;
     }
 
-    public function getAnnotations()
+    private static function deepMerge(array $a, array $b)
     {
-        return $this->data['annotations'];
+        $intersection = array_intersect_key($a, $b);
+        $result = array_replace($a, $b);
+
+        if (array_key_exists('required', $a)) {
+            $result['required'] = $a['required'];
+        }
+
+        foreach ($intersection as $key => $value) {
+
+            if ($value instanceof Type && $b[$key] instanceof Type && !empty($b[$key]->facets)) {
+                $result[$key] = $value->extend($b[$key]->facets);
+            }
+
+            if (!is_array($value)) continue;
+
+            if (array_keys($value) === range(0, count($value))) {
+                $result[$key] = array_merge($a[$key], $b[$key]);
+            } else {
+                $result[$key] = self::deepMerge($a[$key], $b[$key]);
+            }
+        }
+
+        return $result;
     }
 }
