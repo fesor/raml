@@ -13,7 +13,7 @@ class ObjectType extends Type
             'maxProperties',
             'additionalProperties',
             'discriminator',
-            'discriminatorValue'
+            'discriminatorValue',
         ]);
     }
 
@@ -52,12 +52,17 @@ class ObjectType extends Type
         return $this->facets['discriminatorValue'];
     }
 
+    protected function isValidDeclaration()
+    {
+        return true;
+    }
+
     public function required()
     {
         return array_keys(
             array_filter(
-                array_map(function (PropertyItem $item) {
-                    return $item->required();
+                array_map(function (Type $type) {
+                    return $type->isRequired();
                 }, $this->properties())
             )
         );

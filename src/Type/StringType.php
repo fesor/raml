@@ -40,6 +40,11 @@ class StringType extends Type
             (int) $this->facets['maxLength'] : null;
     }
 
+    protected function isValidDeclaration()
+    {
+        return $this->minLength() <= $this->maxLength();
+    }
+
     public function validateValue($value)
     {
         $errors = [
@@ -50,4 +55,6 @@ class StringType extends Type
 
         return array_keys(array_filter($errors));
     }
+
+
 }

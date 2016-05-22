@@ -34,6 +34,11 @@ class NumberType extends Type
         return $this->facets['multipleOf'];
     }
 
+    protected function isValidDeclaration()
+    {
+        return $this->minimum() <= $this->maximum();
+    }
+
     public function validateValue($value)
     {
         $errors = [

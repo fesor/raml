@@ -3,8 +3,7 @@
 namespace spec\Fesor\RAML\Type;
 
 use Fesor\RAML\Type\ObjectType;
-use Fesor\RAML\Type\PropertyItem;
-use PhpSpec\ObjectBehavior;
+use Fesor\RAML\Type\StringType;
 use Prophecy\Argument;
 
 class ObjectTypeSpec extends TypeObjectBehaviour
@@ -13,8 +12,8 @@ class ObjectTypeSpec extends TypeObjectBehaviour
     {
         $this->withFacets([
             'properties' => [
-                'foo' => new PropertyItem(null, true),
-                'bar' => new PropertyItem(null, false)
+                'foo' => new StringType([]),
+                'bar' => new StringType(['required' => false])
             ],
         ]);
     }
@@ -28,21 +27,21 @@ class ObjectTypeSpec extends TypeObjectBehaviour
     {
         $this->extend([
             'properties' => [
-                'buz' => new PropertyItem(null, true)
+                'buz' => new StringType([])
             ]
         ])->shouldReturnExtendedType(function (ObjectType $objectType) {
             return $objectType->required() == ['foo', 'buz'];
         });
     }
 
-    function it_allows_to_make_property_optional()
+    function it_not_allows_to_make_property_optional()
     {
         $this->extend([
             'properties' => [
-                'foo' => new PropertyItem(null, false)
+                'foo' => new StringType(['required' => false])
             ]
         ])->shouldReturnExtendedType(function (ObjectType $objectType) {
-            return $objectType->required() == [];
+            return $objectType->required() == ['foo'];
         });
     }
 }

@@ -28,6 +28,7 @@ abstract class Type
         return [
             'description',
             'displayName',
+            'required'
         ];
     }
 
@@ -41,47 +42,44 @@ abstract class Type
         return (string) $this->facets['description'];
     }
 
+    public function isRequired()
+    {
+        return false !== $this->facets['required'];
+    }
+
     public function extend(array $facets)
     {
         $extendedType = clone $this;
         $extendedType->facets = self::deepMerge($extendedType->facets, $facets);
         $extendedType->baseType = $this;
 
+        if (!$extendedType->isValidDeclaration()) {
+            throw new \RuntimeException('Invalid type declaration');
+        }
+
         return $extendedType;
     }
 
-    public static function extendFromMultipleTypes(array $facets, array $types)
+    protected function isValidDeclaration()
     {
-        if (self::isMultipleInheritanceSupported($types)) {
-            throw new \RuntimeException('Multiple inheritance is not supported for this combination of types');
-        }
-
-        $className = get_class(current($types));
-        $subtype = new $className($facets);
-        $subtype->baseType = $types;
-        foreach ($types as $type) {
-            $subtype->facets = self::deepMerge($subtype->facets, $type->facets);
-        }
-
-        return $subtype;
-    }
-
-    private static function isMultipleInheritanceSupported(array $types)
-    {
-        if (1 !== count(array_map(function (Type $type) {
-            return get_class($type);
-        }, array_filter($types)))) {
-            return false;
-        }
-
         return true;
     }
 
     private static function deepMerge(array $a, array $b)
     {
-        $intersection = array_intersect_key($b, $a);
+        $intersection = array_intersect_key($a, $b);
         $result = array_replace($a, $b);
+
+        if (array_key_exists('required', $a)) {
+            $result['required'] = $a['required'];
+        }
+
         foreach ($intersection as $key => $value) {
+
+            if ($value instanceof Type && $b[$key] instanceof Type && !empty($b[$key]->facets)) {
+                $result[$key] = $value->extend($b[$key]->facets);
+            }
+
             if (!is_array($value)) continue;
 
             if (array_keys($value) === range(0, count($value))) {

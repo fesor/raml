@@ -60,14 +60,6 @@ class TypeConstructor
         if ($type === 'array' && !empty($expandedTypeDeclaration['items'])) {
             $expandedTypeDeclaration['items'] = $this->construct($expandedTypeDeclaration['items'], $typeResolver);
         }
-        if ($type === 'object') {
-            if (!empty($expandedTypeDeclaration['properties'])) {
-                $expandedTypeDeclaration['properties'] = $this->processProperties($expandedTypeDeclaration['properties'], $typeResolver);
-            }
-            if (!empty($expandedTypeDeclaration['patternProperties'])) {
-                $expandedTypeDeclaration['patternProperties'] = $this->processProperties($expandedTypeDeclaration['patternProperties'], $typeResolver, false);
-            }
-        }
 
         $parent = null;
         if (isset(self::$typeDeclarationClassMap[$type])) {
@@ -81,21 +73,5 @@ class TypeConstructor
         }
 
         return $parent->extend($expandedTypeDeclaration);
-    }
-
-    private function processProperties(array $properties, TypeResolver $typeResolver, $requiredByDefault = null)
-    {
-        $requiredByDefault = null === $requiredByDefault ?
-            $this->requiredByDefault : $requiredByDefault;
-
-        return array_map(function ($typeDeclaration) use ($typeResolver, $requiredByDefault) {
-            $required = array_key_exists('required', $typeDeclaration) ?
-                $typeDeclaration['required'] : $requiredByDefault;
-            unset($typeDeclaration['required']);
-
-            $type = $this->construct($typeDeclaration, $typeResolver);
-
-            return new PropertyItem($type, $required);
-        }, $properties);
     }
 }
