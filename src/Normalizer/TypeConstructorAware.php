@@ -3,8 +3,28 @@
 namespace Fesor\RAML\Normalizer;
 
 use Fesor\RAML\Type\TypeConstructor;
+use Fesor\RAML\Type\TypeResolver;
 
-interface TypeConstructorAware
+trait TypeConstructorAware
 {
-    public function setTypeConstructor(TypeConstructor $typeConstructor);
+    /**
+     * @var TypeConstructor
+     */
+    private $typeConstuctor;
+
+    /**
+     * @var TypeResolver
+     */
+    private $typeResolver;
+
+    public function setTypeConstructor(TypeConstructor $typeConstructor, TypeResolver $resolver)
+    {
+        $this->typeConstuctor = $typeConstructor;
+        $this->typeResolver = $resolver;
+    }
+
+    protected function constructType($typeDeclaration)
+    {
+        return $this->typeConstuctor->construct($typeDeclaration, $this->typeResolver);
+    }
 }

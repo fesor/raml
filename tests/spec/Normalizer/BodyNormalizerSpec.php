@@ -15,12 +15,6 @@ class BodyNormalizerSpec extends ObjectBehavior
         $this->setTypeConstructor($typeConstructor);
     }
 
-    function it_type_constructor_aware_normalizer()
-    {
-        $this->shouldImplement(Normalizer::class);
-        $this->shouldImplement(TypeConstructorAware::class);
-    }
-
     function it_supports_only_nodes_which_may_contain_body()
     {
         $this->supports(['foo'])->shouldReturn(false);

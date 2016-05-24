@@ -4,8 +4,10 @@ namespace Fesor\RAML\Normalizer;
 
 use Fesor\RAML\Type\TypeConstructor;
 
-class BodyNormalizer extends AbstractNormalizer implements TypeConstructorAware
+class BodyNormalizer extends AbstractNormalizer
 {
+    use TypeConstructorAware;
+
     private $typeConstructor;
 
     public function setTypeConstructor(TypeConstructor $typeConstructor)
