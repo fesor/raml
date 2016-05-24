@@ -2,6 +2,7 @@
 
 namespace spec\Fesor\RAML\Normalizer;
 
+use Fesor\RAML\AnnotationRef;
 use Fesor\RAML\Normalizer\Normalizer;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -30,10 +31,10 @@ class AnnotationsNormalizerSpec extends ObjectBehavior
             'value' => 'test',
             '(annotation1)' => 'value1',
             '(annotation2)' => 'value2'
-        ])->shouldBeArray([
+        ])->shouldBeLike([
             'annotations' => [
-                'annotation1' => 'value1',
-                'annotation2' => 'value2'
+                new AnnotationRef('annotation1', 'value1'),
+                new AnnotationRef('annotation2', 'value2')
             ],
             'value' => 'test'
         ]);

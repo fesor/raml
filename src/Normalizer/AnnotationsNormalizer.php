@@ -2,6 +2,10 @@
 
 namespace Fesor\RAML\Normalizer;
 
+use Fesor\RAML\AnnotationRef;
+use function \Fesor\RAML\onlyWithinKeys;
+use function \Fesor\RAML\excludingKeys;
+
 class AnnotationsNormalizer implements Normalizer
 {
     public function supports(array $path)
@@ -21,22 +25,32 @@ class AnnotationsNormalizer implements Normalizer
 
     public function normalize(array $value)
     {
-        $annotations = $this->collectAnnotations(array_keys($value));
-        foreach ($annotations as $key => $annotation) {
-            $value['annotations'][$annotation] = $value[$key];
-        }
-
-        return array_diff_key($value, $annotations);
-    }
-
-    private function collectAnnotations($keys)
-    {
-        return array_filter(array_map(function ($key) {
+        $keys = array_keys($value);
+        $annotationsMap = array_filter(array_map(function ($key) {
             if (!preg_match('/^\((.+)\)$/U', $key, $matches)) {
                 return null;
             }
 
             return $matches[1];
         }, array_combine($keys, $keys)));
+
+        $annotations = array_combine(
+            array_values($annotationsMap),
+            array_intersect_key($value, $annotationsMap)
+        );
+        $value = array_diff_key($value, $annotationsMap);
+        $value['annotations'] = $this->processAnnotations($annotations);
+
+        return $value;
+    }
+    
+    private function processAnnotations(array $annotationValues)
+    {
+        $annotations = [];
+        foreach ($annotationValues as $annotationName => $value) {
+            $annotations[] = new AnnotationRef($annotationName, $value);
+        }
+
+        return $annotations;
     }
 }
