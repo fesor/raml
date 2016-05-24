@@ -4,8 +4,24 @@ namespace Fesor\RAML\Normalizer;
 
 use function Fesor\RAML\onlyWithinKeys;
 
-class TypeNormalizer implements Normalizer
+class TypeNormalizer
 {
+    public function supports(array $path)
+    {
+        // TODO: Implement supports() method.
+    }
+
+    public function priority()
+    {
+        // TODO: Implement priority() method.
+    }
+
+    public function supportsDirection()
+    {
+        // TODO: Implement supportsDirection() method.
+    }
+
+
     public function normalize($value)
     {
         $expandedValue = is_array($value) ? $value : [];

@@ -8,11 +8,20 @@ use Prophecy\Argument;
 
 class AnnotationsNormalizerSpec extends ObjectBehavior
 {
-
-    function let(Normalizer $normalizer)
+    function it_supports_only_inward_processing()
     {
-        $this->beConstructedWith($normalizer);
-        $normalizer->normalize(Argument::any())->willReturnArgument(0)->shouldBeCalled();
+        $this->supportsDirection()->shouldReturn(Normalizer::DIRECTION_INWARD);
+    }
+
+    function it_collects_annotations_for_every_node_extept_annotations()
+    {
+        $this->supports(['anything'])->shouldReturn(true);
+        $this->supports(['annotations'])->shouldReturn(false);
+    }
+
+    function it_has_top_priority()
+    {
+        $this->priority()->shouldReturn(50);
     }
 
     function it_collects_annotations()
@@ -22,8 +31,11 @@ class AnnotationsNormalizerSpec extends ObjectBehavior
             '(annotation1)' => 'value1',
             '(annotation2)' => 'value2'
         ])->shouldBeArray([
-            'annotation1' => 'value1',
-            'annotation2' => 'value2'
-        ], ['at' => 'annotations']);
+            'annotations' => [
+                'annotation1' => 'value1',
+                'annotation2' => 'value2'
+            ],
+            'value' => 'test'
+        ]);
     }
 }
