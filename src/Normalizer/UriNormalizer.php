@@ -10,6 +10,21 @@ class UriNormalizer extends AbstractNormalizer
     
     public function normalize(array $value)
     {
+        if (!array_key_exists('uri', $value)) {
+            $value['baseUri'] = new Uri(
+                isset($value['baseUri']) ? $value['baseUri'] : '',
+                $this->processUriParameters(
+                    $value,
+                    'baseUriParameters',
+                    ['version' => 'string']
+                )
+            );
+
+            unset($value['baseUriParameters']);
+
+            return $value;
+        }
+
         return $this->processUri($value);
     }
 
@@ -37,10 +52,12 @@ class UriNormalizer extends AbstractNormalizer
         return $resource;
     }
 
-    private function processUriParameters(array $resource)
+    private function processUriParameters(array $resource, $key = 'uriParameters', array $additionalProperties = [])
     {
-        $uriParams = isset($resource['uriParameters']) ?
-            $resource['uriParameters'] : [];
+        $uriParams = isset($resource[$key]) ?
+            $resource[$key] : [];
+
+        $uriParams = array_replace($additionalProperties, $uriParams);
 
         return $this->constructType([
             'type' => 'object',

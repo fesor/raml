@@ -90,6 +90,23 @@ class UriNormalizerSpec extends ObjectBehavior
         ]);
     }
 
+    function it_normalizes_base_uri()
+    {
+        $this->shouldConstructProperties([
+            'host' => 'string',
+            'version' => 'string'
+        ]);
+        
+        $this->normalize([
+            'baseUri' => 'http://{host}/api/{version}',
+            'baseUriParameters' => [
+                'host' => 'string'
+            ]
+        ])->shouldBeLike([
+            'baseUri' => new Uri('http://{host}/api/{version}', new ObjectType([]))
+        ]);
+    }
+
     private function shouldConstructProperties(array $props)
     {
         $this->typeConstructor
