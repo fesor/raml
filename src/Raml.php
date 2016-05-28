@@ -6,57 +6,93 @@ class Raml
 {
     private $data;
 
+    private $metadata;
+    private $title;
+    private $description;
+    private $version;
+    private $protocols;
+    private $baseUri;
+    private $mediaType;
+    private $documentation;
+    private $types;
+    private $annotationTypes;
+    private $traits;
+    private $resourceTypes;
+    private $securitySchemas;
+    private $resources;
+
     private function __construct(array $data)
     {
-        $this->data = array_replace([
-            'title' => '',
-            'description' => '',
-            'version' => null,
-            'resources' => [],
-            'baseUri' => '',
-        ], $data);
-
-        $this->data['resources'] = Resource::collectionFromArray($this->data['resources']);
+        $this->data = $data;
     }
 
     public static function fromArray($data)
     {
-        return new Raml($data);
+        $mapping = [
+            '_metadata' => 'metadata',
+            'title'  => 'title',
+            'description'    => 'description',
+            'version'    => 'version',
+            'mediaType'  => 'mediaType',
+            'protocols'  => 'protocols',
+            'baseUri'    => 'baseUri',
+            'documentation'  => 'documentation',
+            'types'  => 'types',
+            'traits'     => 'traits',
+            'resourceTypes'  => 'resourceTypes',
+            'annotationTypes'    => 'annotationTypes',
+            'securitySchemas'    => 'securitySchemas',
+            'resources'  => 'resources',
+        ];
+
+        $defaults = [
+            '_metadata' => ['version' => 1.0, 'type' => 'API'],
+            'resources' => [],
+        ];
+
+        $data = array_replace($defaults, $data);
+        $raml = new Raml($data);
+
+        foreach ($mapping as $from => $to) {
+            $raml->{$to} = isset($data[$from]) ? $data[$from] : null;
+        }
+
+        return $raml;
     }
 
     public function getTitle()
     {
-        return $this->data['title'];
+        return $this->title;
     }
 
     public function getDescription()
     {
-        return $this->data['description'];
+        return $this->description;
     }
 
     public function getVersion()
     {
-        return $this->data['version'];
+        return $this->version;
     }
 
     public function getBaseUri()
     {
-        return $this->data['baseUri'];
+        return $this->baseUri;
     }
 
     public function getAllResources()
     {
-        $collection = [];
-        $this->collectResources($collection, $this->data['resources']);
-
-        return $collection;
+        return $this->collectResources($this->resources);
     }
 
-    private function collectResources(array &$collection, array $resources)
+    private function collectResources(array $resources)
     {
+        $collection = [];
         foreach ($resources as $resource) {
             $collection[] = $resource;
-            $this->collectResources($collection, $resource->getSubResources(), $resources);
+            $collection = array_merge($collection, $this->collectResources($resource->getSubResources()));
         }
+
+        return $collection;
     }
 }

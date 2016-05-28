@@ -28,38 +28,20 @@ class RamlSpec extends ObjectBehavior
 
     function it_returns_all_available_resources()
     {
+        $parentResource = Resource::fromArray([]);
+        $childResource = Resource::fromArray([]);
+        $parentResource->addSubResource($childResource);
+
         $this->fromArray([
-            'resources' => [
-                [
-                    'uri' => '/users',
-                    'resources' => [
-                        [
-                            'uri' => '/{id}',
-                            'resources' => []
-                        ]
-                    ]
-                ]
-            ]
+            'resources' => [$parentResource]
         ]);
-        $this->getAllResources()->shouldContainResources([
-            '/users', '/users/{id}',
+        $this->getAllResources()->shouldBeLike([
+            $parentResource,
+            $childResource
         ]);
     }
 
     private function fromArray($raml) {
         $this->beConstructedThrough('fromArray', [$raml]);
-    }
-
-    public function getMatchers()
-    {
-        return [
-            'containResources' => function ($subject, $uris) {
-                $actualUris = array_map(function (Resource $resource) {
-                    return $resource->getAbsoluteUri();
-                }, $subject);
-
-                return $actualUris == $uris;
-            }
-        ];
     }
 }

@@ -6,10 +6,23 @@ class Resource
 {
     private $data;
 
+    private $uri;
+
+    private $displayName;
+
+    private $description;
+
+    private $methods;
+
+    private $securedBy;
+
     private $parent;
+    
+    private $children;
 
     private function __construct(array $data, Resource $parent = null)
     {
+        $this->children = [];
         $this->parent = $parent;
         $this->data = array_replace([
             'description' => '',
@@ -60,6 +73,12 @@ class Resource
 
     public function getSubResources()
     {
-        return $this->data['resources'];
+        return $this->children;
+    }
+    
+    public function addSubResource(Resource $resource)
+    {
+        $this->children[] = $resource;
+        $resource->parent = $resource;
     }
 }
