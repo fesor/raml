@@ -14,11 +14,6 @@ class RecursiveNormalizer implements Normalizer
         $this->outwardNormalizers = $this->sortNormalizers($normalizers, Normalizer::DIRECTION_OUTWARD);
     }
 
-    public function supports(array $path)
-    {
-        return true;
-    }
-
     public function priority()
     {
         return 0;
@@ -29,9 +24,9 @@ class RecursiveNormalizer implements Normalizer
         return self::DIRECTION_ANY;
     }
 
-    public function normalize(array $value)
+    public function normalize($value, array $path = [])
     {
-        return $this->normalizeNode($value, []);
+        return $this->normalizeNode($value, $path);
     }
 
     /**
@@ -60,9 +55,7 @@ class RecursiveNormalizer implements Normalizer
     private function normalizeValue(array $value, array $path, array $normalizers)
     {
         foreach ($normalizers as $normalizer) {
-            if ($normalizer->supports($path)) {
-                $value = $normalizer->normalize($value);
-            }
+            $value = $normalizer->normalize($value, $path);
         }
 
         return $value;

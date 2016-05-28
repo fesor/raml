@@ -11,19 +11,12 @@ interface Normalizer
     /**
      * Normalize structure from one to another
      *
-     * @param array $value
+     * @param mixed $value
+     * @param string[] $path on which normalization should be performed
      * @return mixed
      */
-    public function normalize(array $value);
-
-    /**
-     * Checks is normalizer supports node by given path
-     *
-     * @param string[] $path
-     * @return boolean
-     */
-    public function supports(array $path);
-
+    public function normalize($value, array $path);
+    
     /**
      * Returns priority of normalizer to make it act in order
      *

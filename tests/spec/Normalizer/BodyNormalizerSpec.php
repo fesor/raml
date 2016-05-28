@@ -14,7 +14,7 @@ class BodyNormalizerSpec extends ObjectBehavior
     function let(TypeConstructor $typeConstructor, TypeResolver $resolver)
     {
         $this->setTypeConstructor($typeConstructor, $resolver);
-        $this->normalize(['mediaType' => 'application/json']);
+        $this->normalize(['mediaType' => 'application/json'], []);
     }
 
     function it_supports_only_nodes_which_may_contain_body()
@@ -37,8 +37,8 @@ class BodyNormalizerSpec extends ObjectBehavior
         $this->normalize([
             'body' => [
                 'application/json' => 'CustomType'
-            ]
-        ]);
+            ],
+        ], ['methods', 0]);
     }
     
     function it_normalizes_body_declared_as_just_type_expression(TypeConstructor $typeConstructor, TypeResolver $resolver)
@@ -49,8 +49,8 @@ class BodyNormalizerSpec extends ObjectBehavior
             ->shouldBeCalled();
 
         $this->normalize([
-            'body' => 'CustomType'
-        ]);
+            'body' => 'CustomType',
+        ], ['methods', 0]);
     }
     
     function it_allows_type_expressions_as_values_for_media_type_map(TypeConstructor $typeConstructor, TypeResolver $resolver)
@@ -65,7 +65,7 @@ class BodyNormalizerSpec extends ObjectBehavior
                 'application/json' => [
                     'type' => 'CustomType'
                 ]
-            ]
-        ]);
+            ],
+        ], ['methods', 0]);
     }
 }

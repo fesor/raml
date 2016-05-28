@@ -22,13 +22,17 @@ class ResourceCollectionNormalizer implements Normalizer
         return empty($path) || ('resourceTypes' === $path[0] && 2 === count($path));
     }
 
-    public function normalize(array $value)
+    public function normalize($value, array $path)
     {
-        $resourceKeys = $this->collectResourceKeys($value);
+        if (!$this->supports($path)) {
+            return $value;
+        }
+        
+         $resourceKeys = $this->collectResourceKeys($value);
         $resources = onlyWithinKeys($value, $resourceKeys);
 
         foreach ($resources as $uri => $resource) {
-            $collected = $this->normalize($resource);
+            $collected = $this->normalize($resource, array_merge($path, $path));
             $collected['uri'] = $uri;
             $resources[$uri] = $collected;
         }

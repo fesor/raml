@@ -19,8 +19,8 @@ class RamlNormalizer implements Normalizer
         return 1000;
     }
 
-    public function normalize(array $value)
+    public function normalize($value, array $path)
     {
-        
+        return $value;
     }
 }

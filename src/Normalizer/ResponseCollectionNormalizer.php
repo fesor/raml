@@ -4,8 +4,12 @@ namespace Fesor\RAML\Normalizer;
 
 class ResponseCollectionNormalizer extends AbstractNormalizer
 {
-    public function normalize(array $value)
+    public function normalize($value, array $path)
     {
+        if (!$this->supports($path)) {
+            return $value;
+        }
+        
         $responses = [];
         foreach ($value as $statusCode => $response) {
             $response['statusCode'] = $statusCode;

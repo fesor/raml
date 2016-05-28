@@ -46,7 +46,7 @@ class MethodCollectionNormalizerSpec extends ObjectBehavior
                     'delete' =>  [],
                 ]
             ]
-        ])->shouldBeLike([
+        ], ['resources', 0])->shouldBeLike([
             'methods' => [
                 ['method' => 'post'],
                 ['method' => 'get'],

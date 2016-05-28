@@ -21,8 +21,12 @@ class BodyNormalizer extends AbstractNormalizer
         ], true));
     }
 
-    public function normalize(array $value)
+    public function normalize($value, array $path)
     {
+        if (!$this->supports($path)) {
+            return $value;
+        }
+
         if (!$this->defaultMediaTypeChecked) {
             $this->defaultMediaTypeChecked = true;
             $this->defaultMediaType = isset($value['mediaType']) ?

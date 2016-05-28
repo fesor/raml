@@ -38,7 +38,7 @@ class ResourceCollectionNormalizerSpec extends ObjectBehavior
                     ]
                 ]
             ]
-        ])->shouldBeLike([
+        ], [])->shouldBeLike([
             'resources' => [
                 [
                     'uri' => '/foo',

@@ -23,8 +23,12 @@ class AnnotationsNormalizer implements Normalizer
         return 50;
     }
 
-    public function normalize(array $value)
+    public function normalize($value, array $path)
     {
+        if (!$this->supports($path)) {
+            return $value;
+        }
+        
         $keys = array_keys($value);
         $annotationsMap = array_filter(array_map(function ($key) {
             if (!preg_match('/^\((.+)\)$/U', $key, $matches)) {

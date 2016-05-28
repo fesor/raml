@@ -43,7 +43,7 @@ class UriNormalizerSpec extends ObjectBehavior
         $this->normalize([
             'uri' => '/users',
             'resources' => []
-        ])->shouldBeLike([
+        ], ['resources', 0])->shouldBeLike([
             'uri' => new Uri('/users', new ObjectType([])),
             'resources' => []
         ]);
@@ -58,7 +58,7 @@ class UriNormalizerSpec extends ObjectBehavior
                 'id' => 'integer'
             ],
             'resources' => []
-        ])->shouldBeLike([
+        ], ['resources', 0])->shouldBeLike([
             'uri' => new Uri('/users/{id}', new ObjectType([])),
             'resources' => []
         ]);
@@ -79,7 +79,7 @@ class UriNormalizerSpec extends ObjectBehavior
                     'resources' => []
                 ]
             ]
-        ])->shouldBeLike([
+        ], ['resources', 0])->shouldBeLike([
             'uri' => $parentUri,
             'resources' => [
                 [
@@ -102,7 +102,7 @@ class UriNormalizerSpec extends ObjectBehavior
             'baseUriParameters' => [
                 'host' => 'string'
             ]
-        ])->shouldBeLike([
+        ], [])->shouldBeLike([
             'baseUri' => new Uri('http://{host}/api/{version}', new ObjectType([]))
         ]);
     }

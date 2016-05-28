@@ -8,8 +8,12 @@ class UriNormalizer extends AbstractNormalizer
 {
     use TypeConstructorAware;
     
-    public function normalize(array $value)
+    public function normalize($value, array $path)
     {
+        if (!$this->supports($path)) {
+            return $value;
+        }
+        
         if (!array_key_exists('uri', $value)) {
             $value['baseUri'] = new Uri(
                 isset($value['baseUri']) ? $value['baseUri'] : '',

@@ -18,7 +18,7 @@ class ResponseCollectionNormalizerSpec extends ObjectBehavior
         $this->normalize([
             200 => [],
             401 => []
-        ])->shouldBeLike([
+        ], ['bar', 'responses'])->shouldBeLike([
             ['statusCode' => 200],
             ['statusCode' => 401],
         ]);

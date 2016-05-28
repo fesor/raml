@@ -22,8 +22,12 @@ class MethodCollectionNormalizer implements Normalizer
         return count($path) >= 2 && $path[count($path) - 2] === 'resources';
     }
 
-    public function normalize(array $value)
+    public function normalize($value, array $path)
     {
+        if (!$this->supports($path)) {
+            return $value;
+        }
+
         $verbs = ['get', 'patch', 'put', 'post', 'delete', 'options', 'head'];
         $result = excludingKeys($value, $verbs);
         $methods = onlyWithinKeys($value, $verbs);
