@@ -14,17 +14,11 @@ class BodyNormalizerSpec extends ObjectBehavior
     function let(TypeConstructor $typeConstructor, TypeResolver $resolver)
     {
         $this->setTypeConstructor($typeConstructor, $resolver);
-        $this->normalize(['mediaType' => 'application/json'], []);
     }
 
-    function it_supports_only_nodes_which_may_contain_body()
+    function it_normalizes_only_body_nodes()
     {
-        $this->supports([])->shouldReturn(true);
-        $this->supports(['foo'])->shouldReturn(false);
-        $this->supports(['foo', 'methods', 0])->shouldReturn(true);
-        $this->supports(['foo', 'methods', 0, 'bar'])->shouldReturn(false);
-        $this->supports(['foo', 'responses', 0])->shouldReturn(true);
-        $this->supports(['foo', 'responses', 0, 'bar'])->shouldReturn(false);
+        $this->normalize('CustomType', ['not-body'])->shouldReturn('CustomType');
     }
 
     function it_normalizes_body(TypeConstructor $typeConstructor, TypeResolver $resolver)
@@ -35,10 +29,8 @@ class BodyNormalizerSpec extends ObjectBehavior
             ->shouldBeCalled();
 
         $this->normalize([
-            'body' => [
-                'application/json' => 'CustomType'
-            ],
-        ], ['methods', 0]);
+            'application/json' => 'CustomType'
+        ], ['body']);
     }
     
     function it_normalizes_body_declared_as_just_type_expression(TypeConstructor $typeConstructor, TypeResolver $resolver)
@@ -48,9 +40,7 @@ class BodyNormalizerSpec extends ObjectBehavior
             ->willReturn(new ObjectType([]))
             ->shouldBeCalled();
 
-        $this->normalize([
-            'body' => 'CustomType',
-        ], ['methods', 0]);
+        $this->normalize('CustomType', ['body']);
     }
     
     function it_allows_type_expressions_as_values_for_media_type_map(TypeConstructor $typeConstructor, TypeResolver $resolver)
@@ -61,11 +51,21 @@ class BodyNormalizerSpec extends ObjectBehavior
             ->shouldBeCalled();
 
         $this->normalize([
-            'body' => [
-                'application/json' => [
-                    'type' => 'CustomType'
-                ]
+            'application/json' => [
+                'type' => 'CustomType'
             ],
-        ], ['methods', 0]);
+        ], ['body']);
+    }
+
+    function it_uses_default_media_type_if_not_specified(TypeConstructor $typeConstructor, TypeResolver $resolver)
+    {
+        $this->normalize(['mediaType' => 'text/xml'], []);
+
+        $typeConstructor
+            ->construct('CustomType', $resolver)
+            ->willReturn(new ObjectType([]))
+            ->shouldBeCalled();
+
+        $this->normalize('CustomType', ['body']);
     }
 }

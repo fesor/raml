@@ -3,7 +3,6 @@
 namespace Fesor\RAML\Normalizer;
 
 use Fesor\RAML\Body;
-use Fesor\RAML\Type\TypeConstructor;
 use function Fesor\RAML\isValidMediaType;
 
 class BodyNormalizer extends AbstractNormalizer
@@ -12,36 +11,21 @@ class BodyNormalizer extends AbstractNormalizer
 
     private $defaultMediaType;
 
-    private $defaultMediaTypeChecked = false;
-
-    public function supports(array $path)
-    {
-        return [] === $path || (count($path) >= 2 && in_array($path[count($path) - 2], [
-            'responses', 'methods'
-        ], true));
-    }
-
     public function normalize($value, array $path)
     {
-        if (!$this->supports($path)) {
-            return $value;
-        }
 
-        if (!$this->defaultMediaTypeChecked) {
-            $this->defaultMediaTypeChecked = true;
+        if ([] === $path) {
             $this->defaultMediaType = isset($value['mediaType']) ?
                 $value['mediaType'] : 'application/json';
 
             return $value;
         }
 
-        if (!array_key_exists('body', $value)) {
+        if (end($path) !== 'body') {
             return $value;
         }
 
-        $value['body'] = $this->processBodyDeclaration($value['body']);
-
-        return $value;
+        return $this->processBodyDeclaration($value);
     }
 
     private function processBodyDeclaration($body)
