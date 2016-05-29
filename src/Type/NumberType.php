@@ -6,7 +6,7 @@ class NumberType extends Type
 {
     protected function knownFacets()
     {
-        return array_merge(parent::knownFacets(), [
+        return $this->extendKnownFacets([
             'minimum',
             'maximum',
             'format',

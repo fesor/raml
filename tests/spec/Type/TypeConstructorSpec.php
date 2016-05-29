@@ -4,55 +4,82 @@ namespace spec\Fesor\RAML\Type;
 
 use Fesor\RAML\Normalizer\TypeNormalizer;
 use Fesor\RAML\Type\ArrayType;
+use Fesor\RAML\Type\BooleanType;
+use Fesor\RAML\Type\NullType;
+use Fesor\RAML\Type\NumberType;
 use Fesor\RAML\Type\ObjectType;
+use Fesor\RAML\Type\StringType;
 use Fesor\RAML\Type\Type;
 use Fesor\RAML\Type\TypeResolver;
+use Fesor\RAML\Type\UnionType;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 class TypeConstructorSpec extends ObjectBehavior
 {
-    function let(TypeNormalizer $normalizer)
+    function let(TypeResolver $resolver)
     {
-        $this->beConstructedWith($normalizer);
+        $this->beConstructedWith($resolver);
     }
 
-    function it_constructs_scalar_types_from_string(TypeNormalizer $normalizer, TypeResolver $resolver)
+    function it_supports_string_types()
     {
-        $normalizer->normalize('string')->willReturn(['type' => 'string'])->shouldBeCalled();
-        $this->construct('string', $resolver)->shouldReturnAnInstanceOf(Type::class);
+        $this->createType(['type' => 'string'])->shouldReturnAnInstanceOf(StringType::class);
     }
 
-    function it_constructs_user_defined_types_from_string(TypeNormalizer $normalizer, TypeResolver $resolver)
+    function it_supports_objects()
     {
-        $normalizer->normalize('User')->willReturn(['type' => 'User'])->shouldBeCalled();
-        $resolver->resolve('User')->willReturn('User')->shouldBeCalled();
-
-        $this->construct('User', $resolver)->shouldReturn('User');
-    }
-
-    function it_constructs_array_from_type_expression(TypeNormalizer $normalizer, TypeResolver $resolver)
-    {
-        $normalizer->normalize('User[]')->willReturn(['type' => 'array', 'items' => 'User'])->shouldBeCalled();
-        $normalizer->normalize('User')->willReturn(['type' => 'User'])->shouldBeCalled();
-        $resolver->resolve('User')->willReturn('User')->shouldBeCalled();
-
-        $this->construct('User[]', $resolver)->shouldReturnAnInstanceOf(ArrayType::class);
-    }
-
-    function it_constructs_objects(TypeNormalizer $normalizer, TypeResolver $resolver)
-    {
-        $normalizer->normalize(['type' => 'object'])->willReturn([
-            'type' => 'object',
+        $this->createType([
             'properties' => [
-                'foo' => [
+                'foo' => 'string',
+                'bar?' => 'string',
+                'buz?' => [
                     'type' => 'string',
                     'required' => true
                 ]
             ]
-        ]);
-
-        $this->construct(['type' => 'object'], $resolver)->shouldReturnAnInstanceOf(ObjectType::class);
+        ])->shouldBeLike(new ObjectType([], [
+            'foo' => new StringType([]),
+            'bar' => new StringType(['required' => false]),
+            'buz?' => new StringType(['required' => true]),
+        ]));
     }
 
+    function it_supports_pattern_properties_for_object()
+    {
+        $this->createType([
+            'properties' => [
+                'foo' => 'string',
+                '/^node\-\d+$/' => 'number'
+            ]
+        ])->shouldBeLike(new ObjectType([
+            'patternProperties' => [
+                '/^node\-\d+$/' => new NumberType()
+            ]
+        ], [
+            'foo' => new StringType([]),
+        ]));
+    }
+
+    function it_supports_arrays()
+    {
+        $this->createType(['type' => 'array', 'items' => 'string'])
+            ->shouldBeLike(new ArrayType([
+                'items' => new StringType([])
+            ]));
+    }
+
+    function it_supports_union_types()
+    {
+        $this->createType(['type' => 'string | number'])->shouldBeLike(new UnionType([
+            new NumberType([]), new StringType([])
+        ]));
+    }
+
+    function it_creates_type_declaration_from_type_expression()
+    {
+        $this->createType('string')->shouldReturnAnInstanceOf(StringType::class);
+        $this->createType('null')->shouldReturnAnInstanceOf(NullType::class);
+        $this->createType('boolean')->shouldReturnAnInstanceOf(BooleanType::class);
+    }
 }

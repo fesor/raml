@@ -5,9 +5,9 @@ use \Fesor\RAML\Type;
 class BatchTypeResolutionTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Type\BatchTypeResolver
+     * @var Type\TypeRegistryFactory
      */
-    private $batcnTypeResolver;
+    private $typeRegistryFactory;
 
     /**
      * @var Type\TypeRegistry
@@ -16,17 +16,12 @@ class BatchTypeResolutionTest extends PHPUnit_Framework_TestCase
 
     function setUp()
     {
-        $this->batcnTypeResolver = new Type\BatchTypeResolver(
-            new Type\TypeConstructor(
-                new \Fesor\RAML\Normalizer\TypeNormalizer()
-            ),
-            $this->typeRegistry = new Type\TypeRegistry()
-        );
+        $this->typeRegistryFactory = new Type\TypeRegistryFactory();
     }
 
     function testBatchTypeResolution()
     {
-        $this->batcnTypeResolver->resolveTypeMap([
+        $registry = $this->typeRegistryFactory->create([
             'CorporateEmail' => [
                 'type' => 'Email',
             ],
@@ -36,8 +31,8 @@ class BatchTypeResolutionTest extends PHPUnit_Framework_TestCase
             ],
         ]);
 
-        $emailType = $this->typeRegistry->resolve('Email');
-        $corporateEmailType = $this->typeRegistry->resolve('CorporateEmail');
+        $emailType = $registry->resolve('Email');
+        $corporateEmailType = $registry->resolve('CorporateEmail');
 
         $this->assertEquals(
             $emailType->description(),
@@ -49,7 +44,7 @@ class BatchTypeResolutionTest extends PHPUnit_Framework_TestCase
     function testCyclycTypeDependencies()
     {
         $this->expectException(\RuntimeException::class);
-        $this->batcnTypeResolver->resolveTypeMap([
+        $this->typeRegistryFactory->create([
             'Cycle1' => [
                 'type' => 'Middle'
             ],

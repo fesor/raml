@@ -14,21 +14,10 @@ class UriNormalizerSpec extends ObjectBehavior
     private $resolver;
     private $typeConstructor;
 
-    function let(TypeConstructor $typeConstructor, TypeResolver $resolver)
+    function let(TypeConstructor $typeConstructor)
     {
-        $this->resolver = $resolver;
         $this->typeConstructor = $typeConstructor;
-        $this->setTypeConstructor($typeConstructor, $resolver);
-    }
-
-    function it_supports_nodes_only_containing_uri()
-    {
-        $this->supports([])->shouldReturn(true);
-        $this->supports(['foo', 'resources'])->shouldReturn(false);
-        $this->supports(['foo', 'resources', 0])->shouldReturn(false);
-        $this->supports(['resources', 0])->shouldReturn(true);
-        $this->supports(['resources', 0, 'methods'])->shouldReturn(false);
-        $this->supports(['resources', 0, 'resources', 0])->shouldReturn(false);
+        $this->setTypeConstructor($typeConstructor);
     }
 
     function it_has_medium_priority()
@@ -110,7 +99,7 @@ class UriNormalizerSpec extends ObjectBehavior
     private function shouldConstructProperties(array $props)
     {
         $this->typeConstructor
-            ->construct(['type' => 'object', 'properties' => $props], $this->resolver)
+            ->createType(['type' => 'object', 'properties' => $props], null)
             ->willReturn(new ObjectType([]))
             ->shouldBeCalled();
     }

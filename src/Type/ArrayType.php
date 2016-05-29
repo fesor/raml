@@ -6,7 +6,7 @@ class ArrayType extends Type
 {
     protected function knownFacets()
     {
-        return array_merge(parent::knownFacets(), [
+        return $this->extendKnownFacets([
             'items',
             'minItems',
             'maxItems',

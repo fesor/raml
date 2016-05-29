@@ -6,7 +6,7 @@ class StringType extends Type
 {
     protected function knownFacets()
     {
-        return array_merge(parent::knownFacets(), [
+        return $this->extendKnownFacets([
             'pattern',
             'minLength',
             'maxLength',

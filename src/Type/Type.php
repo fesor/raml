@@ -6,12 +6,13 @@ namespace Fesor\RAML\Type;
 
 abstract class Type
 {
+    protected $name;
     protected $facets;
     protected $userDefinedFacets;
     protected $annotations;
     protected $baseType;
 
-    public function __construct($facets)
+    public function __construct(array $facets = [])
     {
         $keys = $this->knownFacets();
         $defaultValues = array_fill(0, count($keys), null);
@@ -22,14 +23,24 @@ abstract class Type
             array_intersect_key($facets, $defaults)
         );
     }
-
-    protected function knownFacets()
+    
+    protected function extendKnownFacets(array $facets = [])
     {
-        return [
+        return array_merge([
             'description',
             'displayName',
             'required'
-        ];
+        ], $facets);
+    }
+
+    protected function knownFacets()
+    {
+        return $this->extendKnownFacets();
+    }
+
+    public function typeName()
+    {
+        return $this->name;
     }
 
     public function displayName()
@@ -90,5 +101,17 @@ abstract class Type
         }
 
         return $result;
+    }
+
+    public static function named($name, Type $type)
+    {
+        $type->name = $name;
+
+        return $type;
+    }
+
+    public static function any()
+    {
+        return new AnyType();
     }
 }

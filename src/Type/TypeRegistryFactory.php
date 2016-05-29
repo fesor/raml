@@ -5,10 +5,10 @@ namespace Fesor\RAML\Type;
 /**
  * Class BathcTypeResolver
  * @package Fesor\RAML
+ * @internal
  */
-class BatchTypeResolver implements TypeResolver
+class TypeRegistryFactory implements TypeResolver
 {
-
     private $typeConstructor;
 
     private $typeResolutionQueue;
@@ -17,15 +17,19 @@ class BatchTypeResolver implements TypeResolver
 
     private $typesRegistry;
 
-    public function __construct(TypeConstructor $typeConstructor, TypeRegistry $typeRegistry)
+    public function __construct()
     {
-        $this->typeConstructor = $typeConstructor;
+        $this->typesRegistry = new TypeRegistry();
+        $this->typeConstructor = new TypeConstructor($this);
         $this->typeResolutionQueue = [];
         $this->typeDeclarationStack = [];
-        $this->typesRegistry = $typeRegistry;
     }
 
-    public function resolveTypeMap($typeMap)
+    /**
+     * @param array $typeMap
+     * @return TypeRegistry
+     */
+    public function create($typeMap)
     {
         $this->typeResolutionQueue = $typeMap;
 
@@ -36,6 +40,8 @@ class BatchTypeResolver implements TypeResolver
 
             $this->resolve($typeName);
         }
+
+        return $this->typesRegistry;
     }
 
     public function resolve($typeName)
@@ -49,11 +55,11 @@ class BatchTypeResolver implements TypeResolver
         }
         array_push($this->typeDeclarationStack, $typeName);
         $typeDeclaration = $this->typeResolutionQueue[$typeName];
-        $type = $this->typeConstructor->construct($typeDeclaration, $this);
+        $type = $this->typeConstructor->createType($typeDeclaration, $typeName);
         unset($this->typeResolutionQueue[$typeName]);
         array_pop($this->typeDeclarationStack);
 
-        $this->typesRegistry->register($typeName, $type);
+        $this->typesRegistry->register($type);
 
         return $type;
     }

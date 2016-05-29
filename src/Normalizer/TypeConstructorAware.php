@@ -12,19 +12,13 @@ trait TypeConstructorAware
      */
     private $typeConstuctor;
 
-    /**
-     * @var TypeResolver
-     */
-    private $typeResolver;
-
-    public function setTypeConstructor(TypeConstructor $typeConstructor, TypeResolver $resolver)
+    public function setTypeConstructor(TypeConstructor $typeConstructor)
     {
         $this->typeConstuctor = $typeConstructor;
-        $this->typeResolver = $resolver;
     }
 
-    protected function constructType($typeDeclaration)
+    protected function constructType($typeDeclaration, $name = null)
     {
-        return $this->typeConstuctor->construct($typeDeclaration, $this->typeResolver);
+        return $this->typeConstuctor->createType($typeDeclaration, $name);
     }
 }

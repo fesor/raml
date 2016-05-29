@@ -10,11 +10,9 @@ class ObjectTypeSpec extends TypeObjectBehaviour
 {
     function let()
     {
-        $this->withFacets([
-            'properties' => [
-                'foo' => new StringType([]),
-                'bar' => new StringType(['required' => false])
-            ],
+        $this->beConstructedWith([], [
+            'foo' => new StringType([]),
+            'bar' => new StringType(['required' => false])
         ]);
     }
 
@@ -30,11 +28,11 @@ class ObjectTypeSpec extends TypeObjectBehaviour
                 'buz' => new StringType([])
             ]
         ])->shouldReturnExtendedType(function (ObjectType $objectType) {
-            return $objectType->required() == ['foo', 'buz'];
+            return $objectType->required() == ['buz', 'foo'];
         });
     }
 
-    function it_not_allows_to_make_property_optional()
+    function it_does_not_allow_to_override_required_facet_in_subtypes()
     {
         $this->extend([
             'properties' => [

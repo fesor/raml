@@ -4,9 +4,17 @@ namespace Fesor\RAML\Type;
 
 class ObjectType extends Type
 {
+    private $properties;
+
+    public function __construct(array $facets, array $properties = [])
+    {
+        $this->properties = $properties;
+        parent::__construct($facets);
+    }
+
     public function knownFacets()
     {
-        return array_merge(parent::knownFacets(), [
+        return $this->extendKnownFacets([
             'properties',
             'patternProperties',
             'minProperties',
@@ -19,7 +27,20 @@ class ObjectType extends Type
 
     public function properties()
     {
-        return isset($this->facets['properties']) ? $this->facets['properties'] : [];
+        $properties = $this->properties;
+        if (!$this->baseType) {
+            return $properties;
+        }
+
+        $baseType = $this->baseType;
+        if (!is_array($baseType)) {
+            $baseType = [$baseType];
+        }
+        $baseProperties = array_map(function (ObjectType $baseType) {
+            return $baseType->properties();
+        }, $baseType);
+
+        return array_merge($properties, ...$baseProperties);
     }
 
     public function patternProperties()
@@ -55,6 +76,18 @@ class ObjectType extends Type
     protected function isValidDeclaration()
     {
         return true;
+    }
+
+    public function extend(array $facets)
+    {
+        $properties = isset($facets['properties']) ?
+            $facets['properties'] : [];
+        unset($facets['properties']);
+
+        $subtype = parent::extend($facets);
+        $subtype->properties = $properties;
+
+        return $subtype;
     }
 
     public function required()
