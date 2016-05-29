@@ -42,12 +42,12 @@ class Builder
     }
 
     /**
-     * @param string $typeName
+     * @param string|array $typeDeclaration
      * @return Type
      */
-    public function createType($typeName)
+    public function createType($typeDeclaration)
     {
-        return $this->typeConstructor->createType($typeName);
+        return $this->typeConstructor->createType($typeDeclaration);
     }
 
     /**
