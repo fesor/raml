@@ -9,4 +9,10 @@ interface TypeResolver
      * @return Type
      */
     public function resolve($typeName);
+
+    /**
+     * @param Type $typeDefinition
+     * @return void
+     */
+    public function register(Type $typeDefinition);
 }

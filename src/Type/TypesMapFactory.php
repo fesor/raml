@@ -5,9 +5,8 @@ namespace Fesor\RAML\Type;
 /**
  * Class BathcTypeResolver
  * @package Fesor\RAML
- * @internal
  */
-class TypeRegistryFactory implements TypeResolver
+class TypesMapFactory implements TypeResolver
 {
     private $typeConstructor;
 
@@ -15,19 +14,19 @@ class TypeRegistryFactory implements TypeResolver
 
     private $typeDeclarationStack;
 
-    private $typesRegistry;
+    private $types;
 
     public function __construct()
     {
-        $this->typesRegistry = new TypeRegistry();
         $this->typeConstructor = new TypeConstructor($this);
         $this->typeResolutionQueue = [];
         $this->typeDeclarationStack = [];
+        $this->types = [];
     }
 
     /**
      * @param array $typeMap
-     * @return TypeRegistry
+     * @return Type[] hash map
      */
     public function create($typeMap)
     {
@@ -41,13 +40,19 @@ class TypeRegistryFactory implements TypeResolver
             $this->resolve($typeName);
         }
 
-        return $this->typesRegistry;
+        return $this->types;
     }
 
     public function resolve($typeName)
     {
         if ($this->isTypeAlreadyResolved($typeName)) {
-            return $this->typesRegistry->resolve($typeName);
+            if (!isset($this->types[$typeName])) {
+                throw new \RuntimeException(sprintf(
+                    'Unable to resolve type "%s"', $typeName
+                ));
+            }
+
+            return $this->types[$typeName];
         }
 
         if (in_array($typeName, $this->typeDeclarationStack)) {
@@ -59,9 +64,17 @@ class TypeRegistryFactory implements TypeResolver
         unset($this->typeResolutionQueue[$typeName]);
         array_pop($this->typeDeclarationStack);
 
-        $this->typesRegistry->register($type);
+        $this->register($type);
 
         return $type;
+    }
+
+    public function register(Type $type)
+    {
+        if (null === $type->typeName()) {
+            throw new \InvalidArgumentException('Unable to register unnamed type');
+        }
+        $this->types[$type->typeName()] = $type;
     }
 
     private function isTypeAlreadyResolved($typeName)
