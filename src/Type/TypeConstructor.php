@@ -51,12 +51,12 @@ class TypeConstructor
 
                 return Type::named($name, new $className($typeDeclaration));
             case 'object':
-                return $this->createObject($typeDeclaration);
+                return Type::named($name, $this->createObject($typeDeclaration));
             case 'array':
                 $typeDeclaration['items'] = isset($typeDeclaration['items']) ?
                     $this->createType($typeDeclaration['items']) : Type::any();
 
-                return new ArrayType($typeDeclaration);
+                return Type::named($name, new ArrayType($typeDeclaration));
             default:
                 if (preg_match('/^[\w ]+$/', $type)) {
                     return Type::named($name, $this->typeResolver->resolve($type)->extend($typeDeclaration));
