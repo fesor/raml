@@ -15,5 +15,8 @@ class Extension implements ExtensionInterface
         $container->set('matchers.subset_equals', function (ServiceContainer $c) {
             return new DeepEqualsMatcher();
         });
+        $container->set('matchers.collections', function (ServiceContainer $c) {
+            return new CollectionMatcher();
+        });
     }
 }
