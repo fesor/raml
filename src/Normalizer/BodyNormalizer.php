@@ -7,16 +7,14 @@ use function Fesor\RAML\isValidMediaType;
 
 class BodyNormalizer extends AbstractNormalizer
 {
-    use TypeConstructorAware;
-
-    private $defaultMediaType;
-
     public function normalize($value, array $path)
     {
 
         if ([] === $path) {
-            $this->defaultMediaType = isset($value['mediaType']) ?
-                $value['mediaType'] : 'application/json';
+            $this->builder->setDefaultMediaType(
+                isset($value['mediaType']) ?
+                    $value['mediaType'] : 'application/json'
+            );
 
             return $value;
         }
@@ -30,22 +28,23 @@ class BodyNormalizer extends AbstractNormalizer
 
     private function processBodyDeclaration($body)
     {
+        $bodyDeclarations = [];
         if (is_string($body)) {
-            // todo: add error in case if no default media type specified
-            $defaultMediaType = $this->defaultMediaType ?: 'application/json';
-
-            return new Body($defaultMediaType, $this->constructType($body));
+            $bodyDeclarations[] = [
+                'body' => $body,
+                'mediaType' => $this->builder->getDefaultMediaType()
+            ];
+        } else {
+            $bodyDeclarations = $this->handleContentTypeMap($body);
         }
-
-        $body = $this->handleContentTypeMap($body);
 
         return array_map(function ($bodyDeclaration) {
 
             return new Body(
                 $bodyDeclaration['mediaType'],
-                $this->constructType($bodyDeclaration['type'])
+                $this->builder->createType($bodyDeclaration['body'])
             );
-        }, $body);
+        }, $bodyDeclarations);
     }
 
     private function handleContentTypeMap(array $body)
@@ -55,23 +54,19 @@ class BodyNormalizer extends AbstractNormalizer
         });
 
         if (empty($mediaTypes)) {
-            $body['mediaType'] = $this->defaultMediaType;
 
-            return [$body];
+            return $this->handleContentTypeMap([
+                $this->builder->getDefaultMediaType() => $body
+            ]);
         }
 
         $bodies = [];
         foreach ($mediaTypes as $mediaType) {
-            $bodyDeclaration = $body[$mediaType];
 
-            if (is_string($bodyDeclaration)) {
-                $bodyDeclaration = [
-                    'type' => $bodyDeclaration
-                ];
-            }
-
-            $bodyDeclaration['mediaType'] = $mediaType;
-            $bodies[] = $bodyDeclaration;
+            $bodies[] = [
+                'body' => $body[$mediaType],
+                'mediaType' => $mediaType
+            ];
         }
 
         return $bodies;

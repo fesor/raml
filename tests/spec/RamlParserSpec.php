@@ -2,6 +2,7 @@
 
 namespace spec\Fesor\RAML;
 
+use Fesor\RAML\Normalizer\Normalizer;
 use Fesor\RAML\Type\TypeRegistry;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
@@ -11,10 +12,10 @@ class RamlParserSpec extends ObjectBehavior
 {
     private $yamlParserMock;
 
-    function let(Parser $parser, TypeRegistry $typeRegistry)
+    function let(Parser $parser, Normalizer $normalizer)
     {
         $this->yamlParserMock = $parser;
-        $this->beConstructedWith($parser, $typeRegistry);
+        $this->beConstructedWith($parser, $normalizer);
     }
 
     function it_verifies_raml_metadata()

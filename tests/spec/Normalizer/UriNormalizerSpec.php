@@ -2,22 +2,23 @@
 
 namespace spec\Fesor\RAML\Normalizer;
 
+use Fesor\RAML\Builder;
 use Fesor\RAML\Type\ObjectType;
-use Fesor\RAML\Type\TypeConstructor;
-use Fesor\RAML\Type\TypeResolver;
 use Fesor\RAML\Uri;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 class UriNormalizerSpec extends ObjectBehavior
 {
-    private $resolver;
-    private $typeConstructor;
+    /**
+     * @var Builder
+     */
+    private $builder;
 
-    function let(TypeConstructor $typeConstructor)
+    function let(Builder $builder)
     {
-        $this->typeConstructor = $typeConstructor;
-        $this->setTypeConstructor($typeConstructor);
+        $this->builder = $builder;
+        $this->setRamlBuilder($builder);
     }
 
     function it_has_medium_priority()
@@ -98,7 +99,7 @@ class UriNormalizerSpec extends ObjectBehavior
 
     private function shouldConstructProperties(array $props)
     {
-        $this->typeConstructor
+        $this->builder
             ->createType(['type' => 'object', 'properties' => $props], null)
             ->willReturn(new ObjectType([]))
             ->shouldBeCalled();

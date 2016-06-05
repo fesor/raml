@@ -4,8 +4,9 @@
 namespace Fesor\RAML\Normalizer;
 
 use Fesor\RAML\Builder;
+use Fesor\RAML\RamlBuilderAware;
 
-abstract class AbstractNormalizer implements Normalizer
+abstract class AbstractNormalizer implements Normalizer, RamlBuilderAware
 {
     /**
      * @var Builder

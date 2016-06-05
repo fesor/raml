@@ -2,17 +2,23 @@
 
 namespace spec\Fesor\RAML\Normalizer;
 
+use Fesor\RAML\Builder;
 use Fesor\RAML\Type\ObjectType;
-use Fesor\RAML\Type\TypeConstructor;
-use Fesor\RAML\Type\TypeResolver;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 class BodyNormalizerSpec extends ObjectBehavior
 {
-    function let(TypeConstructor $typeConstructor)
+    /**
+     * @var Builder
+     */
+    private $builder;
+
+    function let(Builder $builder)
     {
-        $this->setTypeConstructor($typeConstructor);
+        $this->builder = $builder;
+        $this->setRamlBuilder($builder);
+        $builder->getDefaultMediaType()->willReturn('application/json');
     }
 
     function it_normalizes_only_body_nodes()
@@ -20,25 +26,24 @@ class BodyNormalizerSpec extends ObjectBehavior
         $this->normalize('CustomType', ['not-body'])->shouldReturn('CustomType');
     }
 
-    function it_normalizes_body(TypeConstructor $typeConstructor)
+    function it_normalizes_body()
     {
-        $this->shouldConstructCustomType($typeConstructor);
+        $this->shouldConstructCustomType('CustomType');
 
         $this->normalize([
             'application/json' => 'CustomType'
         ], ['body']);
     }
-    
-    function it_normalizes_body_declared_as_just_type_expression(TypeConstructor $typeConstructor)
-    {
-        $this->shouldConstructCustomType($typeConstructor);
 
+    function it_normalizes_body_declared_as_just_type_expression()
+    {
+        $this->shouldConstructCustomType('CustomType');
         $this->normalize('CustomType', ['body']);
     }
-    
-    function it_allows_type_expressions_as_values_for_media_type_map(TypeConstructor $typeConstructor)
+
+    function it_allows_type_expressions_as_values_for_media_type_map()
     {
-        $this->shouldConstructCustomType($typeConstructor);
+        $this->shouldConstructCustomType();
 
         $this->normalize([
             'application/json' => [
@@ -47,17 +52,16 @@ class BodyNormalizerSpec extends ObjectBehavior
         ], ['body']);
     }
 
-    function it_uses_default_media_type_if_not_specified(TypeConstructor $typeConstructor)
+    function it_uses_default_media_type_if_not_specified()
     {
+        $this->builder->setDefaultMediaType('text/xml')->shouldBeCalled();
         $this->normalize(['mediaType' => 'text/xml'], []);
-        $this->shouldConstructCustomType($typeConstructor);
-        $this->normalize('CustomType', ['body']);
     }
 
-    private function shouldConstructCustomType(TypeConstructor $typeConstructor)
+    private function shouldConstructCustomType($type = ['type' => 'CustomType'])
     {
-        $typeConstructor
-            ->createType('CustomType', null)
+        $this->builder
+            ->createType($type, null)
             ->willReturn(new ObjectType([]))
             ->shouldBeCalled();
     }

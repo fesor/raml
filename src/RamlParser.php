@@ -2,19 +2,31 @@
 
 namespace Fesor\RAML;
 
+use Fesor\RAML\Normalizer\Normalizer;
 use Symfony\Component\Yaml\Parser as YamlParser;
 
 class RamlParser
 {
     private $yamlParser;
 
+    private $normalizer;
+
     /**
      * RamlParser constructor.
-     * @param $yamlParser
+     * @param YamlParser $yamlParser
+     * @param Normalizer $normalizer
      */
-    public function __construct(YamlParser $yamlParser)
+    public function __construct(YamlParser $yamlParser, Normalizer $normalizer)
     {
         $this->yamlParser = $yamlParser;
+        $this->normalizer = $normalizer;
+    }
+
+    public static function parseFile($filePath)
+    {
+        $parser = (new RamlParserFactory())->getRamlParser();
+        
+        return $parser->parse(file_get_contents($filePath));
     }
 
     public function parse($raml, $asFragment = null)
@@ -25,6 +37,8 @@ class RamlParser
 
         $yaml = $this->yamlParser->parse($raml);
         $yaml['_metadata'] = $metadata;
+
+        return $this->normalizer->normalize($yaml, []);
     }
 
     private function retreaveMetadata($raml)

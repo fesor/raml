@@ -12,18 +12,18 @@ class Response
     
     private $headers;
 
-    private $body;
+    private $bodies;
 
     /**
      * Response constructor.
      * @param int $statusCode
      * @param string $description
-     * @param Body $body
+     * @param Body[] $bodies
      * @param ObjectType $headers
      */
-    public function __construct($statusCode, $description, Body $body, ObjectType $headers)
+    public function __construct($statusCode, $description, array $bodies, ObjectType $headers)
     {
-        $this->body = $body;
+        $this->bodies = $bodies;
         $this->statusCode = $statusCode;
         $this->headers = $headers;
     }

@@ -6,8 +6,6 @@ use Fesor\RAML\Uri;
 
 class UriNormalizer extends AbstractNormalizer
 {
-    use TypeConstructorAware;
-    
     public function normalize($value, array $path)
     {
         if (!$this->supports($path)) {
@@ -63,7 +61,7 @@ class UriNormalizer extends AbstractNormalizer
 
         $uriParams = array_replace($additionalProperties, $uriParams);
 
-        return $this->constructType([
+        return $this->builder->createType([
             'type' => 'object',
             'properties' => $uriParams
         ]);

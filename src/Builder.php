@@ -18,6 +18,8 @@ class Builder
 
     private $resourceTypes;
 
+    private $defaultMediaType;
+
     /**
      * RamlBuilder constructor.
      * @param TypeConstructor $typeConstructor
@@ -30,6 +32,22 @@ class Builder
         $this->annotations = [];
         $this->traits = [];
         $this->resourceTypes = [];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultMediaType()
+    {
+        return $this->defaultMediaType;
+    }
+
+    /**
+     * @param mixed $defaultMediaType
+     */
+    public function setDefaultMediaType($defaultMediaType)
+    {
+        $this->defaultMediaType = $defaultMediaType;
     }
 
     /**
