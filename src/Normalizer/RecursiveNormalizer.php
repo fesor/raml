@@ -37,9 +37,9 @@ class RecursiveNormalizer implements Normalizer
     private function normalizeNode(array $value, array $path)
     {
         $value = $this->normalizeValue($value, $path, $this->inwardNormalizers);
-        foreach ($value as $key => &$nodeValue) {
+        foreach ($value as $key => $nodeValue) {
             if (is_array($nodeValue)) {
-                $nodeValue = $this->normalizeNode($nodeValue, array_merge($path, [$key]));
+                $value[$key] = $this->normalizeNode($nodeValue, array_merge($path, [$key]));
             }
         }
 
